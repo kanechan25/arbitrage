@@ -46,7 +46,7 @@ export class PricesService implements OnModuleInit, OnModuleDestroy {
         const tickerPromises = Array.from(this.exchanges.entries()).map(async ([exchangeName, exchange]) => {
           try {
             const tickers = await exchange.watchTickers(symbols);
-            this.logger.debug(`${exchangeName} tickers:`, tickers[symbol]);
+            this.logger.log(`${symbol}: ${exchangeName}: ${tickers[symbol].last}`);
             return {
               exchange: exchangeName,
               ticker: tickers[symbol],
