@@ -1,5 +1,5 @@
 import { Controller, Post, Delete } from '@nestjs/common';
-import { PricesService } from './prices.ws.service';
+import { PricesService } from './prices.service';
 
 @Controller('prices')
 export class PricesController {

@@ -2,9 +2,15 @@ import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/commo
 import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
 
+interface ITicker {
+  exchange: string;
+  ticker: ccxt.Ticker;
+  timestamp: number;
+  last: number;
+}
 @Injectable()
-export class PricesWsService implements OnModuleInit, OnModuleDestroy {
-  private readonly logger = new Logger(PricesWsService.name);
+export class PricesService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(PricesService.name);
   private exchanges: Map<string, ccxt.Exchange> = new Map();
   private isWatching = false;
 
@@ -15,7 +21,7 @@ export class PricesWsService implements OnModuleInit, OnModuleDestroy {
     for (const exchange of exchangesConfig) {
       this.exchanges.set(
         exchange.name,
-        new ccxt.pro[exchange.name]({
+        new ccxt[exchange.name]({
           apiKey: exchange.apiKey,
           secret: exchange.apiSecret,
           enableRateLimit: true,
@@ -39,40 +45,51 @@ export class PricesWsService implements OnModuleInit, OnModuleDestroy {
   async startWatching() {
     this.isWatching = true;
     const symbol = this.configService.get('symbol');
-    const symbols = [symbol];
 
     try {
       while (this.isWatching) {
-        const tickerPromises = Array.from(this.exchanges.entries()).map(async ([exchangeName, exchange]) => {
-          try {
-            const tickers = await exchange.watchTickers(symbols);
-            this.logger.log(`${symbol}: ${exchangeName}: ${tickers[symbol].last}`);
-            return {
-              exchange: exchangeName,
-              ticker: tickers[symbol],
-            };
-          } catch (error) {
-            this.logger.error(`Error watching ${exchangeName} tickers:`, error);
-            return null;
-          }
-        });
+        const tickerPromises = Array.from(this.exchanges.entries()).map(
+          async ([exchangeName, exchange]): Promise<ITicker | null> => {
+            try {
+              const ticker = await exchange.fetchTicker(symbol);
+              if (!ticker || !ticker.last) {
+                this.logger.warn(`No valid ticker data for ${symbol} on ${exchangeName}`);
+                return null;
+              }
+
+              this.logger.log(`${symbol}: ${ticker.last} : ${exchangeName}`);
+              return {
+                exchange: exchangeName,
+                ticker: ticker,
+                timestamp: ticker.timestamp,
+                last: ticker.last,
+              };
+            } catch (error) {
+              this.logger.error(`Error fetching ${symbol} ticker from ${exchangeName}: ${error.message}`);
+              return null;
+            }
+          },
+        );
 
         const results = await Promise.all(tickerPromises);
-        const validResults = results.filter((result) => result !== null);
-
+        const validResults = results.filter((result): result is ITicker => result !== null);
+        // this.logger.log('validResults: ', validResults);
         if (validResults.length > 0) {
           this.analyzePrices(validResults);
+        } else {
+          this.logger.warn('No valid ticker data received from any exchange');
         }
 
-        // Optional: Add delay between iterations
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const delay = this.configService.get('tickerDelay') || 3000;
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     } catch (error) {
       this.logger.error('Error in price watching loop:', error);
+      this.isWatching = false;
     }
   }
 
-  private analyzePrices(results: any[]) {
+  private analyzePrices(results: ITicker[]) {
     // Example price analysis
     const priceMap = new Map();
 
@@ -88,11 +105,12 @@ export class PricesWsService implements OnModuleInit, OnModuleDestroy {
       const minPrice = Math.min(...prices);
       const priceDiff = maxPrice - minPrice;
       const diffPercentage = (priceDiff / minPrice) * 100;
+      this.logger.log(`Price difference opportunity: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
 
       const configuredDiff = this.configService.get('usdt_price_diff');
 
       if (diffPercentage > configuredDiff) {
-        this.logger.log(`Price difference opportunity: ${diffPercentage.toFixed(2)}%`);
+        this.logger.log(`Price difference opportunity: ${diffPercentage.toFixed(4)}%`);
         // Here you could implement your trading logic or notifications
       }
     }
