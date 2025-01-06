@@ -80,7 +80,7 @@ export class PricesService implements OnModuleInit, OnModuleDestroy {
           this.logger.warn('No valid ticker data received from any exchange');
         }
 
-        const delay = this.configService.get('tickerDelay') || 3000;
+        const delay = this.configService.get('fetch_ticker_delay') || 3000;
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     } catch (error) {
@@ -109,9 +109,8 @@ export class PricesService implements OnModuleInit, OnModuleDestroy {
 
       const configuredDiff = this.configService.get('usdt_price_diff');
 
-      if (diffPercentage > configuredDiff) {
-        this.logger.log(`Price difference opportunity: ${diffPercentage.toFixed(4)}%`);
-        // Here you could implement your trading logic or notifications
+      if (priceDiff > configuredDiff) {
+        this.logger.log(`Have an opportunity!!!`);
       }
     }
   }
