@@ -5,6 +5,7 @@ import * as ccxt from 'ccxt';
 
 @Injectable()
 export class PricesService implements OnModuleInit, OnModuleDestroy {
+  private recentTicks: ITicker[] = [];
   private readonly logger = new Logger(PricesService.name);
   private exchanges: Map<string, ccxt.Exchange> = new Map();
   private isWatching = false;
@@ -52,13 +53,19 @@ export class PricesService implements OnModuleInit, OnModuleDestroy {
                 return null;
               }
 
-              this.logger.log(`${symbol}: ${ticker.last} : ${exchangeName}`);
-              return {
+              const tickData = {
                 exchange: exchangeName,
                 ticker: ticker,
                 timestamp: ticker.timestamp,
                 last: ticker.last,
               };
+              // // Store the tick keep only last 100 ticks
+              this.recentTicks.push(tickData);
+              if (this.recentTicks.length > 100) {
+                this.recentTicks.shift();
+              }
+              this.logger.log(`${symbol}: ${ticker.last} : ${exchangeName}`);
+              return tickData;
             } catch (error) {
               this.logger.error(`Error fetching ${symbol} ticker from ${exchangeName}: ${error.message}`);
               return null;
@@ -112,5 +119,8 @@ export class PricesService implements OnModuleInit, OnModuleDestroy {
 
   stopWatching() {
     this.isWatching = false;
+  }
+  public getRecentTicks(): ITicker[] {
+    return this.recentTicks;
   }
 }

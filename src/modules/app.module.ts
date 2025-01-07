@@ -3,6 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { HelloModule } from '@/modules/hello/hello.module';
 import { PricesModule } from '@/modules/prices/prices.module';
 import config from '@/config';
+import { PricesLogsController } from './prices/prices.logs.controller';
+import { PricesController } from './prices/prices.controller';
 
 @Module({
   imports: [
@@ -13,7 +15,7 @@ import config from '@/config';
     HelloModule,
     PricesModule,
   ],
-  controllers: [],
+  controllers: [PricesController, PricesLogsController],
   providers: [],
 })
 export class AppModule {}
