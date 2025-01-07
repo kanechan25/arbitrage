@@ -37,11 +37,11 @@ export default () => ({
       apiKey: process.env.HUOBI_API_KEY,
       apiSecret: process.env.HUOBI_API_SECRET,
     },
-    {
-      name: 'gateio',
-      apiKey: process.env.GATEIO_API_KEY,
-      apiSecret: process.env.GATEIO_API_SECRET,
-    },
+    // {
+    //   name: 'gateio',
+    //   apiKey: process.env.GATEIO_API_KEY,
+    //   apiSecret: process.env.GATEIO_API_SECRET,
+    // },
     {
       name: 'lbank',
       apiKey: process.env.LBANK_API_KEY,

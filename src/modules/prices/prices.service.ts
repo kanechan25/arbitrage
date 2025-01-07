@@ -92,21 +92,32 @@ export class PricesService implements OnModuleInit, OnModuleDestroy {
   }
 
   private analyzePrices(results: ITicker[]) {
-    // Example price analysis
-    const priceMap = new Map();
+    // Create price entries from results
+    const priceEntries = results
+      .filter((result) => result.ticker?.last)
+      .map((result) => [result.exchange, result.ticker.last] as const);
 
-    results.forEach((result) => {
-      if (result.ticker) {
-        priceMap.set(result.exchange, result.ticker.last);
-      }
-    });
+    if (priceEntries.length >= 2) {
+      // Find min and max prices with their exchanges in a single pass
+      const { minExchange, minPrice, maxExchange, maxPrice } = priceEntries.reduce(
+        (acc, [exchange, price]) => ({
+          minExchange: price < acc.minPrice ? exchange : acc.minExchange,
+          minPrice: Math.min(price, acc.minPrice),
+          maxExchange: price > acc.maxPrice ? exchange : acc.maxExchange,
+          maxPrice: Math.max(price, acc.maxPrice),
+        }),
+        {
+          minExchange: priceEntries[0][0],
+          minPrice: priceEntries[0][1],
+          maxExchange: priceEntries[0][0],
+          maxPrice: priceEntries[0][1],
+        },
+      );
 
-    if (priceMap.size >= 2) {
-      const prices = Array.from(priceMap.values());
-      const maxPrice = Math.max(...prices);
-      const minPrice = Math.min(...prices);
       const priceDiff = maxPrice - minPrice;
       const diffPercentage = (priceDiff / minPrice) * 100;
+
+      this.logger.log(`minPrice: (${minPrice}) (${minExchange}) | maxPrice: (${maxPrice}) (${maxExchange})`);
       this.logger.log(`Price difference opportunity: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
 
       const configuredDiff = this.configService.get('usdt_price_diff');
