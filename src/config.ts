@@ -1,5 +1,5 @@
 export default () => ({
-  symbol: 'BTC/USDT',
+  symbol: 'ETH/USDT',
   symbols: ['BTC/USDT', 'ETH/USDT', 'BNB/USDT', 'SOL/USDT'],
   exchanges: [
     {
@@ -56,5 +56,5 @@ export default () => ({
   usdt_amount: 100,
   usdt_price_diff: 1,
   min_profit_percentage: 1,
-  fetch_ticker_delay: 10000,
+  fetch_ticker_delay: 100000,
 });

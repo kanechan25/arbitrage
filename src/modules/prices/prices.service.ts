@@ -44,53 +44,61 @@ export class PricesService implements OnModuleInit, OnModuleDestroy {
 
     try {
       while (this.isWatching) {
-        const tickerPromises = Array.from(this.exchanges.entries()).map(
-          async ([exchangeName, exchange]): Promise<ITicker | null> => {
-            try {
-              const ticker = await exchange.fetchTicker(symbol);
-              if (!ticker || !ticker.last) {
-                this.logger.warn(`No valid ticker data for ${symbol} on ${exchangeName}`);
-                return null;
-              }
-
-              const tickData = {
-                exchange: exchangeName,
-                ticker: ticker,
-                timestamp: ticker.timestamp,
-                last: ticker.last,
-              };
-              // // Store the tick keep only last 100 ticks
-              this.recentTicks.push(tickData);
-              if (this.recentTicks.length > 100) {
-                this.recentTicks.shift();
-              }
-              this.logger.log(`${symbol}: ${ticker.last} : ${exchangeName}`);
-              return tickData;
-            } catch (error) {
-              this.logger.error(`Error fetching ${symbol} ticker from ${exchangeName}: ${error.message}`);
-              return null;
-            }
-          },
-        );
-
-        const results = await Promise.all(tickerPromises);
-        const validResults = results.filter((result): result is ITicker => result !== null);
-        // this.logger.log('validResults: ', validResults);
-        if (validResults.length > 0) {
-          this.analyzePrices(validResults);
-        } else {
-          this.logger.warn('No valid ticker data received from any exchange');
-        }
-
-        const delay = this.configService.get('fetch_ticker_delay') || 3000;
-        await new Promise((resolve) => setTimeout(resolve, delay));
+        await this.fetchSingleTicker(symbol);
       }
     } catch (error) {
       this.logger.error('Error in price watching loop:', error);
       this.isWatching = false;
     }
   }
+  private async fetchSingleTicker(symbol: string): Promise<ITicker[]> {
+    const tickerPromises = Array.from(this.exchanges.entries()).map(
+      async ([exchangeName, exchange]): Promise<ITicker> => {
+        try {
+          const ticker = await exchange.fetchTicker(symbol);
+          if (!ticker || !ticker.last) {
+            this.logger.warn(`No valid ticker data for ${symbol} on ${exchangeName}`);
+            return null;
+          }
+          const tickData: ITicker = {
+            exchange: exchangeName,
+            ticker: ticker,
+            timestamp: ticker.timestamp,
+            last: ticker.last,
+          };
+          this.storeTickData(tickData);
+          // this.logger.log(`${symbol}: ${ticker.last} : ${exchangeName}`);
+          return tickData;
+        } catch (error) {
+          this.logger.error(`Error fetching ${symbol} ticker from ${exchangeName}: ${error.message}`);
+          return null;
+        }
+      },
+    );
 
+    const results = await Promise.all(tickerPromises);
+    const validResults = results.filter((result): result is ITicker => result !== null);
+    // this.logger.log('validResults: ', validResults);
+    if (validResults.length > 0) {
+      this.analyzePrices(validResults);
+    } else {
+      this.logger.warn('No valid ticker data received from any exchange');
+    }
+    await this.delay();
+    return validResults;
+  }
+
+  private storeTickData(tickData: ITicker): void {
+    this.recentTicks.push(tickData);
+    if (this.recentTicks.length > 100) {
+      this.recentTicks.shift();
+    }
+  }
+
+  private async delay(): Promise<void> {
+    const delay = this.configService.get('fetch_ticker_delay') || 3000;
+    await new Promise((resolve) => setTimeout(resolve, delay));
+  }
   private analyzePrices(results: ITicker[]) {
     // Create price entries from results
     const priceEntries = results
