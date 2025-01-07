@@ -1,15 +1,28 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Logger } from '@nestjs/common';
 import { PricesService } from './prices.service';
 
 @Controller('prices/logs')
 export class PricesLogsController {
+  private readonly logger = new Logger(PricesLogsController.name);
+
   constructor(private readonly pricesService: PricesService) {}
 
   @Get()
   getRecentTicks() {
-    return {
-      ticks: this.pricesService.getRecentTicks(),
-      timestamp: new Date().toISOString(),
-    };
+    try {
+      this.logger.log('Fetching recent ticks');
+      const ticks = this.pricesService.getRecentTicks();
+      return {
+        success: true,
+        ticks: ticks,
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      this.logger.error(`Error fetching ticks: ${error.message}`);
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
   }
 }
