@@ -1,13 +1,8 @@
+import { ITicker } from '@/types';
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
 
-interface ITicker {
-  exchange: string;
-  ticker: ccxt.Ticker;
-  timestamp: number;
-  last: number;
-}
 @Injectable()
 export class PricesService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(PricesService.name);
@@ -110,7 +105,7 @@ export class PricesService implements OnModuleInit, OnModuleDestroy {
       const configuredDiff = this.configService.get('usdt_price_diff');
 
       if (priceDiff > configuredDiff) {
-        this.logger.log(`Have an opportunity!!!`);
+        // this.logger.log(`Have an opportunity!!!`);
       }
     }
   }
