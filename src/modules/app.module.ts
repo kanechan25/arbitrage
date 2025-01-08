@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { PricesModule } from '@/modules/arbitrage/arb.module';
+import { ArbModule } from '@/modules/arbitrage/arb.module';
 import config from '@/config';
 import { ArbController } from './arbitrage/arb.controller';
 
@@ -10,7 +10,7 @@ import { ArbController } from './arbitrage/arb.controller';
       isGlobal: true,
       load: [config],
     }),
-    PricesModule,
+    ArbModule,
   ],
   controllers: [ArbController],
   providers: [],

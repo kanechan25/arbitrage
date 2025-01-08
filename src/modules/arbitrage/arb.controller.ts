@@ -3,17 +3,17 @@ import { ArbService } from './arb.service';
 
 @Controller('arbitrage')
 export class ArbController {
-  constructor(private readonly arbController: ArbService) {}
+  constructor(private readonly arbService: ArbService) {}
 
   @Post('start')
   async startWatching() {
-    await this.arbController.startWatching();
-    return { message: 'Price watching started' };
+    await this.arbService.startWatching();
+    return { message: 'Arbitrage watching started' };
   }
 
   @Delete('stop')
   stopWatching() {
-    this.arbController.stopWatching();
-    return { message: 'Price watching stopped' };
+    this.arbService.stopWatching();
+    return { message: 'Arbitrage watching stopped' };
   }
 }
