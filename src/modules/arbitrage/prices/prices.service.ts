@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
-import { IMultiTickers, ITicker, ITickerRecords } from '@/types';
+import { IListenTicker, IMultiTickers, ITicker, ITickerRecords } from '@/types';
 
 @Injectable()
 export class PricesService {
@@ -55,7 +55,7 @@ export class PricesService {
     return validResults;
   }
 
-  async fetchSingleTicker(exchanges: Map<string, ccxt.Exchange>, symbol: string): Promise<ITicker[]> {
+  async fetchSingleTicker(exchanges: Map<string, ccxt.Exchange>, symbol: string): Promise<IListenTicker | null> {
     const tickerPromises = Array.from(exchanges.entries()).map(async ([exchangeName, exchange]): Promise<ITicker> => {
       try {
         const ticker = await exchange.fetchTicker(symbol);
@@ -80,12 +80,11 @@ export class PricesService {
     const validResults = results.filter((result): result is ITicker => result !== null);
     // this.logger.log('validResults: ', validResults);
     if (validResults.length > 0) {
-      this.analyzePrices(validResults);
+      return this.analyzePrices(validResults);
     } else {
       this.logger.warn('No valid ticker data received from any exchange');
+      return null;
     }
-    await this.delay();
-    return validResults;
   }
 
   private storeTickData(tickData: ITicker): void {
@@ -95,14 +94,14 @@ export class PricesService {
     }
   }
 
-  private async delay(): Promise<void> {
+  async delay(): Promise<void> {
     const delay_min: number = this.configService.get('fetch_delay_min');
     const delay_max: number = this.configService.get('fetch_delay_max');
     const delay = Math.floor(Math.random() * (delay_max - delay_min)) + delay_min;
     this.logger.log(`____________________________________delay: ${delay}`);
     await new Promise((resolve) => setTimeout(resolve, delay));
   }
-  private analyzePrices(results: ITicker[]) {
+  private analyzePrices(results: ITicker[]): IListenTicker | null {
     const priceEntries = results
       .filter((result) => result.ticker?.last)
       .map((result) => [result.exchange, result.ticker.symbol, result.ticker.last] as const);
@@ -128,7 +127,7 @@ export class PricesService {
       const priceDiff = maxPrice - minPrice;
       const diffPercentage = (priceDiff / minPrice) * 100;
 
-      this.logger.log(` ${symbol}: Min: (${minPrice}) (${minExchange}) | Max: (${maxPrice}) (${maxExchange})`);
+      this.logger.log(` ${symbol}: Min: ${minPrice} (${minExchange}) | Max: ${maxPrice} (${maxExchange})`);
       this.logger.log(`Price difference opportunity: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
 
       const configuredDiff = this.configService.get('usdt_price_diff');
@@ -145,6 +144,7 @@ export class PricesService {
         };
       }
     }
+    return null;
   }
 
   public getRecentTicks(): ITicker[] {

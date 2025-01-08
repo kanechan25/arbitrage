@@ -17,3 +17,12 @@ export interface IMultiTickers {
   exchange: string;
   tickers: ITickers;
 }
+export interface IListenTicker {
+  symbol: string;
+  minExchange: string;
+  minPrice: number;
+  maxExchange: string;
+  maxPrice: number;
+  priceDiff: number;
+  diffPercentage: number;
+}

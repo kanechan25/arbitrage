@@ -49,13 +49,13 @@ export class ArbService implements OnModuleInit, OnModuleDestroy {
     // const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        await this.pricesService.fetchSingleTicker(this.exchanges, symbol);
-        // const balanceResult = await this.binanceService.fetchBalance(symbol);
-        // if (!balanceResult.success) {
-        //   console.error(`Failed to fetch balance: ${balanceResult.error}`);
-        //   continue;
-        // }
-        // this.logger.log('balanceResult: ', balanceResult);
+        // const listenTicker = await this.pricesService.fetchSingleTicker(this.exchanges, symbol);
+        // await this.pricesService.delay();
+        const balanceResult = await this.binanceService.fetchBalance(symbol);
+        if (!balanceResult.success) {
+          console.error(`Failed to fetch balance: ${balanceResult.error}`);
+          continue;
+        }
       }
     } catch (error) {
       this.logger.error('Error in price watching loop:', error);
