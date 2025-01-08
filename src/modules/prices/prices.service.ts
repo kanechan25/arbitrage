@@ -1,4 +1,4 @@
-import { ITicker } from '@/types';
+import { IMultiTickers, ITicker, ITickerRecords } from '@/types';
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
@@ -40,17 +40,65 @@ export class PricesService implements OnModuleInit, OnModuleDestroy {
 
   async startWatching() {
     this.isWatching = true;
-    const symbol = this.configService.get('symbol');
-
+    // const symbol: string = this.configService.get('symbol');
+    const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        await this.fetchSingleTicker(symbol);
+        await this.fetchMultipleTickers(symbols);
       }
     } catch (error) {
       this.logger.error('Error in price watching loop:', error);
       this.isWatching = false;
     }
   }
+  private async fetchMultipleTickers(symbols: string[]): Promise<ITickerRecords[]> {
+    const tickerPromises = Array.from(this.exchanges.entries()).map(
+      async ([exchangeName, exchange]): Promise<IMultiTickers> => {
+        try {
+          const tickers = await exchange.fetchTickers(symbols);
+          if (!tickers) {
+            this.logger.warn(`No valid ticker data on ${exchangeName}`);
+            return null;
+          }
+          const tickData: IMultiTickers = {
+            exchange: exchangeName,
+            tickers,
+          };
+          // this.logger.log('__tickData: ', tickData);
+          // this.storeTickData(tickData);
+          // this.logger.log(`${symbol}: ${ticker.last} : ${exchangeName}`);
+          return tickData;
+        } catch (error) {
+          this.logger.error(`Error fetching ticker from ${exchangeName}: ${error.message}`);
+          return null;
+        }
+      },
+    );
+
+    const results = await Promise.all(tickerPromises);
+    const fulfillResults = results.filter((result): result is IMultiTickers => result !== null);
+    const validResults: ITickerRecords[] = symbols.map((symbol) => ({
+      [symbol]: fulfillResults.map((result) => ({
+        exchange: result.exchange,
+        ticker: result.tickers[symbol],
+        timestamp: result.tickers[symbol].timestamp,
+        last: result.tickers[symbol].last,
+      })),
+    }));
+    // this.logger.log('__validResults: ', validResults);
+    if (validResults.length > 0) {
+      validResults.map((validResult) => {
+        Object.values(validResult).map((results) => {
+          this.analyzePrices(results);
+        });
+      });
+    } else {
+      this.logger.warn('No valid ticker data received from any exchange');
+    }
+    await this.delay();
+    return validResults;
+  }
+
   private async fetchSingleTicker(symbol: string): Promise<ITicker[]> {
     const tickerPromises = Array.from(this.exchanges.entries()).map(
       async ([exchangeName, exchange]): Promise<ITicker> => {
@@ -66,7 +114,7 @@ export class PricesService implements OnModuleInit, OnModuleDestroy {
             timestamp: ticker.timestamp,
             last: ticker.last,
           };
-          this.storeTickData(tickData);
+          // this.storeTickData(tickData);
           // this.logger.log(`${symbol}: ${ticker.last} : ${exchangeName}`);
           return tickData;
         } catch (error) {
@@ -78,7 +126,7 @@ export class PricesService implements OnModuleInit, OnModuleDestroy {
 
     const results = await Promise.all(tickerPromises);
     const validResults = results.filter((result): result is ITicker => result !== null);
-    // this.logger.log('validResults: ', validResults);
+    this.logger.log('validResults: ', validResults);
     if (validResults.length > 0) {
       this.analyzePrices(validResults);
     } else {
@@ -103,29 +151,31 @@ export class PricesService implements OnModuleInit, OnModuleDestroy {
     // Create price entries from results
     const priceEntries = results
       .filter((result) => result.ticker?.last)
-      .map((result) => [result.exchange, result.ticker.last] as const);
+      .map((result) => [result.exchange, result.ticker.symbol, result.ticker.last] as const);
 
     if (priceEntries.length >= 2) {
       // Find min and max prices with their exchanges in a single pass
-      const { minExchange, minPrice, maxExchange, maxPrice } = priceEntries.reduce(
-        (acc, [exchange, price]) => ({
+      const { symbol, minExchange, minPrice, maxExchange, maxPrice } = priceEntries.reduce(
+        (acc, [exchange, symbol, price]) => ({
+          symbol: price < acc.minPrice ? symbol : acc.symbol,
           minExchange: price < acc.minPrice ? exchange : acc.minExchange,
           minPrice: Math.min(price, acc.minPrice),
           maxExchange: price > acc.maxPrice ? exchange : acc.maxExchange,
           maxPrice: Math.max(price, acc.maxPrice),
         }),
         {
+          symbol: priceEntries[0][1],
           minExchange: priceEntries[0][0],
-          minPrice: priceEntries[0][1],
+          minPrice: priceEntries[0][2],
           maxExchange: priceEntries[0][0],
-          maxPrice: priceEntries[0][1],
+          maxPrice: priceEntries[0][2],
         },
       );
 
       const priceDiff = maxPrice - minPrice;
       const diffPercentage = (priceDiff / minPrice) * 100;
 
-      this.logger.log(`minPrice: (${minPrice}) (${minExchange}) | maxPrice: (${maxPrice}) (${maxExchange})`);
+      this.logger.log(` ${symbol}: Min: (${minPrice}) (${minExchange}) | Max: (${maxPrice}) (${maxExchange})`);
       this.logger.log(`Price difference opportunity: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
 
       const configuredDiff = this.configService.get('usdt_price_diff');
