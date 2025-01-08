@@ -40,11 +40,11 @@ export class PricesService implements OnModuleInit, OnModuleDestroy {
 
   async startWatching() {
     this.isWatching = true;
-    // const symbol: string = this.configService.get('symbol');
-    const symbols: string[] = this.configService.get('symbols');
+    const symbol: string = this.configService.get('symbol');
+    // const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        await this.fetchMultipleTickers(symbols);
+        await this.fetchSingleTicker(symbol);
       }
     } catch (error) {
       this.logger.error('Error in price watching loop:', error);
@@ -126,7 +126,7 @@ export class PricesService implements OnModuleInit, OnModuleDestroy {
 
     const results = await Promise.all(tickerPromises);
     const validResults = results.filter((result): result is ITicker => result !== null);
-    this.logger.log('validResults: ', validResults);
+    // this.logger.log('validResults: ', validResults);
     if (validResults.length > 0) {
       this.analyzePrices(validResults);
     } else {
@@ -144,20 +144,21 @@ export class PricesService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async delay(): Promise<void> {
-    const delay = this.configService.get('fetch_ticker_delay') || 3000;
+    const delay_min: number = this.configService.get('fetch_delay_min');
+    const delay_max: number = this.configService.get('fetch_delay_max');
+    const delay = Math.floor(Math.random() * (delay_max - delay_min + 1000)) + delay_min;
+    this.logger.log(`____________________________________delay: ${delay}`);
     await new Promise((resolve) => setTimeout(resolve, delay));
   }
   private analyzePrices(results: ITicker[]) {
-    // Create price entries from results
     const priceEntries = results
       .filter((result) => result.ticker?.last)
       .map((result) => [result.exchange, result.ticker.symbol, result.ticker.last] as const);
 
     if (priceEntries.length >= 2) {
-      // Find min and max prices with their exchanges in a single pass
       const { symbol, minExchange, minPrice, maxExchange, maxPrice } = priceEntries.reduce(
         (acc, [exchange, symbol, price]) => ({
-          symbol: price < acc.minPrice ? symbol : acc.symbol,
+          symbol: symbol,
           minExchange: price < acc.minPrice ? exchange : acc.minExchange,
           minPrice: Math.min(price, acc.minPrice),
           maxExchange: price > acc.maxPrice ? exchange : acc.maxExchange,
