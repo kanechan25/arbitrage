@@ -1,17 +1,17 @@
 import { Controller, Get, Logger } from '@nestjs/common';
-import { PricesService } from './prices.service';
+import { ArbService } from '../arb.service';
 
 @Controller('logs')
 export class PricesLogsController {
   private readonly logger = new Logger(PricesLogsController.name);
 
-  constructor(private readonly pricesService: PricesService) {}
+  constructor(private readonly arbController: ArbService) {}
 
   @Get()
   getRecentTicks() {
     try {
       this.logger.log('Fetching recent ticks');
-      const ticks = this.pricesService.getRecentTicks();
+      const ticks = this.arbController.getRecentTicks();
       return {
         success: true,
         ticks: ticks,

@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { PricesModule } from '@/modules/prices/prices.module';
+import { PricesModule } from '@/modules/arbitrage/arb.module';
 import config from '@/config';
-import { PricesLogsController } from './prices/prices.logs.controller';
-import { PricesController } from './prices/prices.controller';
+import { ArbController } from './arbitrage/arb.controller';
 
 @Module({
   imports: [
@@ -13,7 +12,7 @@ import { PricesController } from './prices/prices.controller';
     }),
     PricesModule,
   ],
-  controllers: [PricesLogsController, PricesController],
+  controllers: [ArbController],
   providers: [],
 })
 export class AppModule {}

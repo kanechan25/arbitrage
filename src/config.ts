@@ -56,6 +56,6 @@ export default () => ({
   usdt_amount: 100,
   usdt_price_diff: 1,
   min_profit_percentage: 1,
-  fetch_delay_min: 5000,
-  fetch_delay_max: 20000,
+  fetch_delay_min: 3000,
+  fetch_delay_max: 6000,
 });

@@ -2,15 +2,19 @@ import { IMultiTickers, ITicker, ITickerRecords } from '@/types';
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
+import { BinanceService } from '@/modules/cex/binance/binance.service';
 
 @Injectable()
-export class PricesService implements OnModuleInit, OnModuleDestroy {
+export class ArbService implements OnModuleInit, OnModuleDestroy {
   private recentTicks: ITicker[] = [];
-  private readonly logger = new Logger(PricesService.name);
+  private readonly logger = new Logger(ArbService.name);
   private exchanges: Map<string, ccxt.Exchange> = new Map();
   private isWatching = false;
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private binanceService: BinanceService,
+    private configService: ConfigService,
+  ) {
     // Initialize exchanges from config
     const exchangesConfig = this.configService.get('exchanges');
 
@@ -32,7 +36,6 @@ export class PricesService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleDestroy() {
     this.isWatching = false;
-    // Close all exchange connections
     for (const exchange of this.exchanges.values()) {
       await exchange.close();
     }
@@ -45,12 +48,19 @@ export class PricesService implements OnModuleInit, OnModuleDestroy {
     try {
       while (this.isWatching) {
         await this.fetchSingleTicker(symbol);
+        // const balanceResult = await this.binanceService.fetchBalance(symbol);
+        // if (!balanceResult.success) {
+        //   console.error(`Failed to fetch balance: ${balanceResult.error}`);
+        //   continue;
+        // }
+        // this.logger.log('balanceResult: ', balanceResult);
       }
     } catch (error) {
       this.logger.error('Error in price watching loop:', error);
       this.isWatching = false;
     }
   }
+
   private async fetchMultipleTickers(symbols: string[]): Promise<ITickerRecords[]> {
     const tickerPromises = Array.from(this.exchanges.entries()).map(
       async ([exchangeName, exchange]): Promise<IMultiTickers> => {
@@ -146,7 +156,7 @@ export class PricesService implements OnModuleInit, OnModuleDestroy {
   private async delay(): Promise<void> {
     const delay_min: number = this.configService.get('fetch_delay_min');
     const delay_max: number = this.configService.get('fetch_delay_max');
-    const delay = Math.floor(Math.random() * (delay_max - delay_min + 1000)) + delay_min;
+    const delay = Math.floor(Math.random() * (delay_max - delay_min)) + delay_min;
     this.logger.log(`____________________________________delay: ${delay}`);
     await new Promise((resolve) => setTimeout(resolve, delay));
   }
