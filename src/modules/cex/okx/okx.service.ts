@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as ccxt from 'ccxt';
 
 @Injectable()
-export class BinanceService {
+export class OkxService {
   private exchange: ccxt.okx;
 
   constructor() {

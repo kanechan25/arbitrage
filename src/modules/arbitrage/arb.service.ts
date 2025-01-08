@@ -1,19 +1,19 @@
 import * as ccxt from 'ccxt';
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ITicker } from '@/types';
-import { BinanceService } from '@/modules/cex/binance/binance.service';
 import { PricesService } from '@/modules/arbitrage/prices/prices.service';
+import { BinanceService } from '@/modules/cex/binance/binance.service';
+import { OkxService } from '@/modules/cex/okx/okx.service';
 
 @Injectable()
 export class ArbService implements OnModuleInit, OnModuleDestroy {
-  private recentTicks: ITicker[] = [];
   private isWatching = false;
   private readonly logger = new Logger(ArbService.name);
   private exchanges: Map<string, ccxt.Exchange> = new Map();
 
   constructor(
     private binanceService: BinanceService,
+    private okxService: OkxService,
     private configService: ConfigService,
     private pricesService: PricesService,
   ) {
@@ -27,6 +27,7 @@ export class ArbService implements OnModuleInit, OnModuleDestroy {
           apiKey: exchange.apiKey,
           secret: exchange.apiSecret,
           enableRateLimit: true,
+          verbose: true,
         }),
       );
     }
@@ -45,17 +46,18 @@ export class ArbService implements OnModuleInit, OnModuleDestroy {
 
   async startWatching() {
     this.isWatching = true;
-    const symbol: string = this.configService.get('symbol');
+    // const symbol: string = this.configService.get('symbol');
     // const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
         // const listenTicker = await this.pricesService.fetchSingleTicker(this.exchanges, symbol);
-        // await this.pricesService.delay();
-        const balanceResult = await this.binanceService.fetchBalance(symbol);
+        const balanceResult = await this.okxService.fetchBalance();
         if (!balanceResult.success) {
           console.error(`Failed to fetch balance: ${balanceResult.error}`);
           continue;
         }
+        this.logger.log('__balanceResult__', balanceResult);
+        await this.pricesService.delay();
       }
     } catch (error) {
       this.logger.error('Error in price watching loop:', error);
