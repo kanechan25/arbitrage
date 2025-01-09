@@ -47,11 +47,6 @@ export default () => ({
       apiKey: process.env.LBANK_API_KEY,
       apiSecret: process.env.LBANK_API_SECRET,
     },
-    // {
-    //   name: 'cryptocom',
-    //   apiKey: process.env.CRYPTCOM_API_KEY,
-    //   apiSecret: process.env.CRYPTCOM_API_SECRET,
-    // },
   ],
   usdt_amount: 100,
   usdt_price_diff: 1, // diff in usd
