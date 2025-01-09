@@ -1,7 +1,7 @@
 import * as ccxt from 'ccxt';
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PricesService } from '@/modules/arbitrage/prices/prices.service';
+import { PricesService } from '@/modules/cex/prices/prices.service';
 import { BinanceService } from '@/modules/cex/binance/binance.service';
 import { OkxService } from '@/modules/cex/okx/okx.service';
 
@@ -51,7 +51,7 @@ export class ArbService implements OnModuleInit, OnModuleDestroy {
     try {
       while (this.isWatching) {
         // const listenTicker = await this.pricesService.fetchSingleTicker(this.exchanges, symbol);
-        const balanceResult = await this.okxService.fetchBalance();
+        const balanceResult = await this.binanceService.fetchBalance(['USDT', 'ETH']);
         if (!balanceResult.success) {
           console.error(`Failed to fetch balance: ${balanceResult.error}`);
           continue;

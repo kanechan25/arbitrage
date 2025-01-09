@@ -3,23 +3,28 @@ import * as ccxt from 'ccxt';
 
 @Injectable()
 export class BinanceService {
-  private exchange: ccxt.okx;
+  private exchange: ccxt.binance;
 
   constructor() {
-    this.exchange = new ccxt.okx({
-      apiKey: process.env.OKX_API_KEY,
-      secret: process.env.OKX_API_SECRET,
-      password: process.env.OKX_PASSWORD,
+    this.exchange = new ccxt.binance({
+      apiKey: process.env.BINANCE_API_KEY,
+      secret: process.env.BINANCE_API_SECRET,
     });
   }
 
-  async fetchBalance(symbol?: string) {
+  async fetchBalance(symbol?: string[]) {
     try {
       const balance = await this.exchange.fetchBalance();
-      if (symbol) {
+      if (symbol && symbol.length === 1) {
         return {
           success: true,
-          data: balance[symbol] || { free: 0, used: 0, total: 0 },
+          data: balance[symbol[0]] || { free: 0, used: 0, total: 0 },
+        };
+      }
+      if (symbol && symbol.length > 1) {
+        return {
+          success: true,
+          data: symbol.map((sym) => balance[sym] || { free: 0, used: 0, total: 0 }),
         };
       }
       return {
