@@ -6,9 +6,9 @@ import { BinanceService } from '@/modules/cex/binance/binance.service';
 import { OkxService } from '@/modules/cex/okx/okx.service';
 
 @Injectable()
-export class ArbService implements OnModuleInit, OnModuleDestroy {
+export class CexArbService implements OnModuleInit, OnModuleDestroy {
   private isWatching = false;
-  private readonly logger = new Logger(ArbService.name);
+  private readonly logger = new Logger(CexArbService.name);
   private exchanges: Map<string, ccxt.Exchange> = new Map();
 
   constructor(

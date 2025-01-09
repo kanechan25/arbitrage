@@ -1,19 +1,19 @@
 import { Controller, Post, Delete } from '@nestjs/common';
-import { ArbService } from './arb.service';
+import { CexArbService } from './cex_arb.service';
 
 @Controller('arbitrage')
-export class ArbController {
-  constructor(private readonly arbService: ArbService) {}
+export class CexArbController {
+  constructor(private readonly cexArbService: CexArbService) {}
 
   @Post('start')
   async startWatching() {
-    await this.arbService.startWatching();
+    await this.cexArbService.startWatching();
     return { message: 'Arbitrage watching started' };
   }
 
   @Delete('stop')
   stopWatching() {
-    this.arbService.stopWatching();
+    this.cexArbService.stopWatching();
     return { message: 'Arbitrage watching stopped' };
   }
 }

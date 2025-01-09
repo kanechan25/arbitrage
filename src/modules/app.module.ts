@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { ArbModule } from '@/modules/arbitrage/arb.module';
+import { CexArbModule } from '@/modules/cex-arb/cex_arb.module';
 import cexConfig from '@/config/cex.config';
-import { ArbController } from './arbitrage/arb.controller';
+import { CexArbController } from './cex-arb/cex_arb.controller';
 
 @Module({
   imports: [
@@ -10,9 +10,9 @@ import { ArbController } from './arbitrage/arb.controller';
       isGlobal: true,
       load: [cexConfig],
     }),
-    ArbModule,
+    CexArbModule,
   ],
-  controllers: [ArbController],
+  controllers: [CexArbController],
   providers: [],
 })
 export class AppModule {}
