@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { PricesService } from './prices.service';
-import { ITicker } from '@/types';
+import { ITicker } from '@/types/cex';
 
 @Controller('prices')
 export class PricesController {

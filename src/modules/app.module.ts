@@ -1,18 +1,19 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { CexArbModule } from '@/modules/cex-arb/cex_arb.module';
 import cexConfig from '@/config/cex.config';
-import { CexArbController } from './cex-arb/cex_arb.controller';
-
+import { DexArbController } from './dex-arb/dex_arb.controller';
+import { DexArbModule } from './dex-arb/dex_arb.module';
+import * as dotenv from 'dotenv';
+dotenv.config();
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [cexConfig],
     }),
-    CexArbModule,
+    DexArbModule,
   ],
-  controllers: [CexArbController],
+  controllers: [DexArbController],
   providers: [],
 })
 export class AppModule {}

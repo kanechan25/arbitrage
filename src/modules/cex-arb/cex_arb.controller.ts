@@ -1,7 +1,7 @@
 import { Controller, Post, Delete } from '@nestjs/common';
 import { CexArbService } from './cex_arb.service';
 
-@Controller('arbitrage')
+@Controller('cex-arb')
 export class CexArbController {
   constructor(private readonly cexArbService: CexArbService) {}
 

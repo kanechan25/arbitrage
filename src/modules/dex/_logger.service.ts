@@ -1,12 +1,16 @@
-import winston from 'winston';
+import { Injectable } from '@nestjs/common';
+import * as winston from 'winston';
+const { combine, timestamp, json } = winston.format;
 
+@Injectable()
 export class LoggerService {
   private logger: winston.Logger;
 
   constructor() {
     this.logger = winston.createLogger({
       level: 'info',
-      format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
+      // format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
+      format: combine(timestamp(), json()),
       transports: [
         new winston.transports.File({ filename: 'error.log', level: 'error' }),
         new winston.transports.File({ filename: 'combined.log' }),
@@ -30,5 +34,9 @@ export class LoggerService {
 
   logProfit(profit: { amount: number; buyDex: string; sellDex: string; duration: number }) {
     this.logger.info('Profit realized', { ...profit });
+  }
+
+  logInfo(message: string) {
+    this.logger.info(message);
   }
 }
