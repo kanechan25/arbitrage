@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Connection } from '@solana/web3.js';
-import { CONFIG } from '../../config/constants';
+// import { CONFIG } from '../../config/constants';
 
 @Injectable()
 export class RaydiumService {

@@ -9,7 +9,6 @@ export class LoggerService {
   constructor() {
     this.logger = winston.createLogger({
       level: 'info',
-      // format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
       format: combine(timestamp(), json()),
       transports: [
         new winston.transports.File({ filename: 'error.log', level: 'error' }),

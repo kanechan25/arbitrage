@@ -1,11 +1,10 @@
-import { Injectable } from '@nestjs/common';
 import { JupiterService } from '@/modules/dex/jupiter.service';
 import { RaydiumService } from '@/modules/dex/raydium.service';
 import { WalletService } from '@/modules/dex/wallet.service';
 import { LoggerService } from '@/modules/dex/_logger.service';
 import { CONFIG } from '@/config/constants';
 import { IRaydiumPairs } from '@/types/dex';
-import { OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { OnModuleInit, OnModuleDestroy, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class DexArbService implements OnModuleInit, OnModuleDestroy {
@@ -29,8 +28,8 @@ export class DexArbService implements OnModuleInit, OnModuleDestroy {
         // for (const pair of CONFIG.TRADING_PAIRS) {
         //   await this.checkAndExecuteArbitrage(pair);
         // }
-        // await this.getWalletBalance();
-        this.logger.logInfo(`____run flows____`);
+        this.walletService.getBalance(CONFIG.USDC_MINT);
+        this.logger.logInfo(`____run flows____ ${Date.now()}`);
       } catch (error) {
         this.logger.logError(error, 'monitoring');
       }
@@ -46,9 +45,5 @@ export class DexArbService implements OnModuleInit, OnModuleDestroy {
   async stopMonitoring() {
     this.isMonitoring = false;
     this.logger.logInfo('Arbitrage monitoring stopped');
-  }
-
-  async getWalletBalance(): Promise<number> {
-    return this.walletService.getBalance(CONFIG.USDC_MINT);
   }
 }

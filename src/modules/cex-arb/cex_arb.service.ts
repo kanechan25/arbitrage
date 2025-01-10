@@ -65,7 +65,7 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  stopWatching() {
+  async stopWatching() {
     this.isWatching = false;
   }
 }

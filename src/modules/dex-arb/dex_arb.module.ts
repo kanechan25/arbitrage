@@ -7,6 +7,7 @@ import { WalletService } from '../dex/wallet.service';
 import { LoggerService } from '../dex/_logger.service';
 
 @Module({
+  imports: [],
   controllers: [DexArbController],
   providers: [DexArbService, JupiterService, RaydiumService, WalletService, LoggerService],
   exports: [DexArbService],

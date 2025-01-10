@@ -8,12 +8,18 @@ export class CexArbController {
   @Post('start')
   async startWatching() {
     await this.cexArbService.startWatching();
-    return { message: 'Arbitrage watching started' };
+    return {
+      message: 'CEX Arbitrage watching started',
+      timestamp: new Date().toISOString(),
+    };
   }
 
   @Delete('stop')
-  stopWatching() {
-    this.cexArbService.stopWatching();
-    return { message: 'Arbitrage watching stopped' };
+  async stopWatching() {
+    await this.cexArbService.stopWatching();
+    return {
+      message: 'CEX Arbitrage watching stopped',
+      timestamp: new Date().toISOString(),
+    };
   }
 }
