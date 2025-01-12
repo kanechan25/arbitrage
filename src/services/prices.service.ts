@@ -51,7 +51,6 @@ export class PricesService {
     } else {
       this.logger.warn('No valid ticker data received from any exchange');
     }
-    await this.delay();
     return validResults;
   }
 
@@ -87,20 +86,6 @@ export class PricesService {
     }
   }
 
-  private storeTickData(tickData: ITicker): void {
-    this.recentTicks.push(tickData);
-    if (this.recentTicks.length > 100) {
-      this.recentTicks.shift();
-    }
-  }
-
-  async delay(): Promise<void> {
-    const delay_min: number = this.configService.get('fetch_delay_min');
-    const delay_max: number = this.configService.get('fetch_delay_max');
-    const delay = Math.floor(Math.random() * (delay_max - delay_min)) + delay_min;
-    this.logger.log(`____________________________________delay: ${delay}`);
-    await new Promise((resolve) => setTimeout(resolve, delay));
-  }
   private analyzePrices(results: ITicker[]): IListenTicker | null {
     const priceEntries = results
       .filter((result) => result.ticker?.last)
@@ -145,6 +130,12 @@ export class PricesService {
       }
     }
     return null;
+  }
+  private storeTickData(tickData: ITicker): void {
+    this.recentTicks.push(tickData);
+    if (this.recentTicks.length > 100) {
+      this.recentTicks.shift();
+    }
   }
 
   public getRecentTicks(): ITicker[] {
