@@ -3,7 +3,7 @@ import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/commo
 import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
 import { BinanceService } from '@/services/cex/binance/binance.service';
-import { PricesService } from '@/services/prices.service';
+import { PricesService } from '@/services/cex/prices.service';
 
 @Injectable()
 export class CexArbService implements OnModuleInit, OnModuleDestroy {
@@ -74,6 +74,7 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
 
   stopWatching() {
     this.isWatching = false;
+    this.logger.log('Stopping price watching');
   }
   public getRecentTicks(): ITicker[] {
     return this.recentTicks;

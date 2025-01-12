@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { CexArbService } from './cex_arb.service';
 import { CexArbController } from './cex_arb.controller';
-import { PricesService } from '@/services/prices.service';
+import { PricesService } from '@/services/cex/prices.service';
 import { BinanceService } from '@/services/cex/binance/binance.service';
 import { OkxService } from '@/services/cex/okx/okx.service';
 

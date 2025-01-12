@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
+import * as fs from 'fs';
+import * as path from 'path';
 
 import { IListenTicker, IMultiTickers, ITicker, ITickerRecords } from '@/types/cex';
 
@@ -8,8 +10,17 @@ import { IListenTicker, IMultiTickers, ITicker, ITickerRecords } from '@/types/c
 export class PricesService {
   private recentTicks: ITicker[] = [];
   private readonly logger = new Logger(PricesService.name);
+  private readonly logFilePath: string;
 
-  constructor(private configService: ConfigService) {}
+  constructor(private configService: ConfigService) {
+    const logsDir = path.join(process.cwd(), 'logs');
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir);
+    }
+    const symbol = this.configService.get('symbol').replace('/', '_');
+    const timestamp = Math.floor(new Date().getTime() / 1000);
+    this.logFilePath = path.join(logsDir, `prices_${symbol}_${timestamp}.log`);
+  }
 
   async fetchMultipleTickers(exchanges: Map<string, ccxt.Exchange>, symbols: string[]): Promise<ITickerRecords[]> {
     const tickerPromises = Array.from(exchanges.entries()).map(
@@ -121,6 +132,8 @@ export class PricesService {
 
       this.logger.log(` ${symbol}: Min: ${minPrice} (${minExchange}) | Max: ${maxPrice} (${maxExchange})`);
       this.logger.log(`Price difference opportunity: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
+      const logEntry = `${new Date().toISOString()} | ${symbol} | Min: ${minPrice} (${minExchange}) | Max: ${maxPrice} (${maxExchange}) | Diff: ${priceDiff} (${diffPercentage.toFixed(4)}%)\n`;
+      fs.appendFileSync(this.logFilePath, logEntry);
 
       const configuredDiff = this.configService.get('usdt_price_diff');
 
