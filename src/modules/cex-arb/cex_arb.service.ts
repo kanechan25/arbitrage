@@ -45,17 +45,17 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
 
   async startWatching() {
     this.isWatching = true;
-    const symbol: string = this.configService.get('symbol');
+    // const symbol: string = this.configService.get('symbol');
     // const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        await this.pricesService.fetchSingleTicker(this.exchanges, symbol);
-        // const balanceResult = await this.binanceService.fetchBalance(symbol);
-        // if (!balanceResult.success) {
-        //   console.error(`Failed to fetch balance: ${balanceResult.error}`);
-        //   continue;
-        // }
-        // this.logger.log('balanceResult: ', balanceResult);
+        // await this.pricesService.fetchSingleTicker(this.exchanges, symbol);
+        const balanceResult = await this.binanceService.fetchBalance(['ETH', 'USDT']);
+        if (!balanceResult.success) {
+          console.error(`Failed to fetch balance: ${balanceResult.error}`);
+          continue;
+        }
+        this.logger.log('balanceResult: ', balanceResult);
         await this.delay();
       }
     } catch (error) {

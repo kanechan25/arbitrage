@@ -89,23 +89,29 @@ export class PricesService {
   private analyzePrices(results: ITicker[]): IListenTicker | null {
     const priceEntries = results
       .filter((result) => result.ticker?.last)
-      .map((result) => [result.exchange, result.ticker.symbol, result.ticker.last] as const);
+      .map((result) => ({
+        exchange: result.exchange,
+        symbol: result.ticker.symbol,
+        price: result.ticker.last,
+      }));
+
+    this.logger.log('priceEntries: ', priceEntries);
 
     if (priceEntries.length >= 2) {
       const { symbol, minExchange, minPrice, maxExchange, maxPrice } = priceEntries.reduce(
-        (acc, [exchange, symbol, price]) => ({
-          symbol: symbol,
-          minExchange: price < acc.minPrice ? exchange : acc.minExchange,
-          minPrice: Math.min(price, acc.minPrice),
-          maxExchange: price > acc.maxPrice ? exchange : acc.maxExchange,
-          maxPrice: Math.max(price, acc.maxPrice),
+        (acc, entry) => ({
+          symbol: entry.symbol,
+          minExchange: entry.price < acc.minPrice ? entry.exchange : acc.minExchange,
+          minPrice: Math.min(entry.price, acc.minPrice),
+          maxExchange: entry.price > acc.maxPrice ? entry.exchange : acc.maxExchange,
+          maxPrice: Math.max(entry.price, acc.maxPrice),
         }),
         {
-          symbol: priceEntries[0][1],
-          minExchange: priceEntries[0][0],
-          minPrice: priceEntries[0][2],
-          maxExchange: priceEntries[0][0],
-          maxPrice: priceEntries[0][2],
+          symbol: priceEntries[0].symbol,
+          minExchange: priceEntries[0].exchange,
+          minPrice: priceEntries[0].price,
+          maxExchange: priceEntries[0].exchange,
+          maxPrice: priceEntries[0].price,
         },
       );
 
