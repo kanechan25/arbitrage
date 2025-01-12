@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
+
 import { IListenTicker, IMultiTickers, ITicker, ITickerRecords } from '@/types/cex';
 
 @Injectable()

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Connection, Keypair } from '@solana/web3.js';
-import { LoggerService } from './_logger.service';
+import { LoggerService } from '@/services/_logger.service';
 import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
 
 @Injectable()

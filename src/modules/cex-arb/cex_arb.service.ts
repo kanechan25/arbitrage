@@ -2,7 +2,7 @@ import { ITicker } from '@/types/cex';
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
-import { BinanceService } from '@/modules/cex/binance/binance.service';
+import { BinanceService } from '@/services/cex/binance/binance.service';
 import { PricesService } from '@/services/prices.service';
 
 @Injectable()
@@ -45,17 +45,17 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
 
   async startWatching() {
     this.isWatching = true;
-    // const symbol: string = this.configService.get('symbol');
+    const symbol: string = this.configService.get('symbol');
     // const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        // await this.pricesService.fetchSingleTicker(this.exchanges, symbol);
-        const balanceResult = await this.binanceService.fetchBalance(['ETH', 'USDT']);
-        if (!balanceResult.success) {
-          console.error(`Failed to fetch balance: ${balanceResult.error}`);
-          continue;
-        }
-        this.logger.log('balanceResult: ', balanceResult);
+        await this.pricesService.fetchSingleTicker(this.exchanges, symbol);
+        // const balanceResult = await this.binanceService.fetchBalance(['ETH', 'USDT']);
+        // if (!balanceResult.success) {
+        //   console.error(`Failed to fetch balance: ${balanceResult.error}`);
+        //   continue;
+        // }
+        // this.logger.log('balanceResult: ', balanceResult);
         await this.delay();
       }
     } catch (error) {

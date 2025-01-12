@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { DexArbController } from './dex_arb.controller';
 import { DexArbService } from './dex_arb.service';
-import { JupiterService } from '../dex/jupiter.service';
-import { RaydiumService } from '../dex/raydium.service';
-import { WalletService } from '../dex/wallet.service';
-import { LoggerService } from '../dex/_logger.service';
+import { JupiterService } from '@/services/dex/jupiter.service';
+import { RaydiumService } from '@/services/dex/raydium.service';
+import { WalletService } from '@/services/dex/wallet.service';
+import { LoggerService } from '@/services/_logger.service';
 
 @Module({
   imports: [],

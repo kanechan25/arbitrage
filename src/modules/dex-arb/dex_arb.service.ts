@@ -1,7 +1,7 @@
-import { JupiterService } from '@/modules/dex/jupiter.service';
-import { RaydiumService } from '@/modules/dex/raydium.service';
-import { WalletService } from '@/modules/dex/wallet.service';
-import { LoggerService } from '@/modules/dex/_logger.service';
+import { JupiterService } from '@/services/dex/jupiter.service';
+import { RaydiumService } from '@/services/dex/raydium.service';
+import { WalletService } from '@/services/dex/wallet.service';
+import { LoggerService } from '@/services/_logger.service';
 import { OnModuleInit, OnModuleDestroy, Injectable } from '@nestjs/common';
 
 @Injectable()
