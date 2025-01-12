@@ -5,11 +5,12 @@ import { CexArbController } from './cex_arb.controller';
 import { PricesService } from '@/services/cex/prices.service';
 import { BinanceService } from '@/services/cex/binance/binance.service';
 import { OkxService } from '@/services/cex/okx/okx.service';
+import { LoggerService } from '@/services/_logger.service';
 
 @Module({
   imports: [ConfigModule],
   controllers: [CexArbController],
-  providers: [CexArbService, PricesService, BinanceService, OkxService],
+  providers: [CexArbService, PricesService, BinanceService, OkxService, LoggerService],
   exports: [CexArbService],
 })
 export class CexArbModule {}

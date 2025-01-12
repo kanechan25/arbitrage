@@ -1,26 +1,17 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
-import * as fs from 'fs';
-import * as path from 'path';
-
+import { LoggerService } from '@/services/_logger.service';
 import { IListenTicker, IMultiTickers, ITicker, ITickerRecords } from '@/types/cex';
 
 @Injectable()
 export class PricesService {
   private recentTicks: ITicker[] = [];
-  private readonly logger = new Logger(PricesService.name);
-  private readonly logFilePath: string;
 
-  constructor(private configService: ConfigService) {
-    const logsDir = path.join(process.cwd(), 'logs');
-    if (!fs.existsSync(logsDir)) {
-      fs.mkdirSync(logsDir);
-    }
-    const symbol = this.configService.get('symbol').replace('/', '_');
-    const timestamp = Math.floor(new Date().getTime() / 1000);
-    this.logFilePath = path.join(logsDir, `prices_${symbol}_${timestamp}.log`);
-  }
+  constructor(
+    private configService: ConfigService,
+    private logger: LoggerService,
+  ) {}
 
   async fetchMultipleTickers(exchanges: Map<string, ccxt.Exchange>, symbols: string[]): Promise<ITickerRecords[]> {
     const tickerPromises = Array.from(exchanges.entries()).map(
@@ -28,7 +19,7 @@ export class PricesService {
         try {
           const tickers = await exchange.fetchTickers(symbols);
           if (!tickers) {
-            this.logger.warn(`No valid ticker data on ${exchangeName}`);
+            this.logger.logWarning(`No valid ticker data on ${exchangeName}`);
             return null;
           }
           const tickData: IMultiTickers = {
@@ -37,7 +28,7 @@ export class PricesService {
           };
           return tickData;
         } catch (error) {
-          this.logger.error(`Error fetching ticker from ${exchangeName}: ${error.message}`);
+          this.logger.logError(error, `Error fetching ticker from ${exchangeName}: ${error.message}`);
           return null;
         }
       },
@@ -61,7 +52,7 @@ export class PricesService {
         });
       });
     } else {
-      this.logger.warn('No valid ticker data received from any exchange');
+      this.logger.logWarning('No valid ticker data received from any exchange');
     }
     return validResults;
   }
@@ -71,7 +62,7 @@ export class PricesService {
       try {
         const ticker = await exchange.fetchTicker(symbol);
         if (!ticker || !ticker.last) {
-          this.logger.warn(`No valid ticker data for ${symbol} on ${exchangeName}`);
+          this.logger.logWarning(`No valid ticker data for ${symbol} on ${exchangeName}`);
           return null;
         }
         const tickData: ITicker = {
@@ -82,7 +73,7 @@ export class PricesService {
         };
         return tickData;
       } catch (error) {
-        this.logger.error(`Error fetching ${symbol} ticker from ${exchangeName}: ${error.message}`);
+        this.logger.logError(error, `Error fetching ${symbol} ticker from ${exchangeName}: ${error.message}`);
         return null;
       }
     });
@@ -93,7 +84,7 @@ export class PricesService {
     if (validResults.length > 0) {
       return this.analyzePrices(validResults);
     } else {
-      this.logger.warn('No valid ticker data received from any exchange');
+      this.logger.logWarning('No valid ticker data received from any exchange');
       return null;
     }
   }
@@ -106,8 +97,6 @@ export class PricesService {
         symbol: result.ticker.symbol,
         price: result.ticker.last,
       }));
-
-    this.logger.log('priceEntries: ', priceEntries);
 
     if (priceEntries.length >= 2) {
       const { symbol, minExchange, minPrice, maxExchange, maxPrice } = priceEntries.reduce(
@@ -130,11 +119,17 @@ export class PricesService {
       const priceDiff = maxPrice - minPrice;
       const diffPercentage = (priceDiff / minPrice) * 100;
 
-      this.logger.log(` ${symbol}: Min: ${minPrice} (${minExchange}) | Max: ${maxPrice} (${maxExchange})`);
-      this.logger.log(`Price difference opportunity: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
-      const logEntry = `${new Date().toISOString()} | ${symbol} | Min: ${minPrice} (${minExchange}) | Max: ${maxPrice} (${maxExchange}) | Diff: ${priceDiff} (${diffPercentage.toFixed(4)}%)\n`;
-      fs.appendFileSync(this.logFilePath, logEntry);
-
+      // this.logger.logInfo(` ${symbol}: Min: ${minPrice} (${minExchange}) | Max: ${maxPrice} (${maxExchange})`);
+      // this.logger.logInfo(`Price difference opportunity: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
+      this.logger.logPrices({
+        symbol,
+        minPrice,
+        maxPrice,
+        minExchange,
+        maxExchange,
+        priceDiff,
+        diffPercentage: Number(diffPercentage.toFixed(4)),
+      });
       const configuredDiff = this.configService.get('usdt_price_diff');
 
       if (priceDiff > configuredDiff) {
