@@ -44,6 +44,7 @@ export class LoggerService {
     maxExchange: string;
     priceDiff: number;
     diffPercentage: number;
+    [key: string]: string | number;
   }) {
     const timeNow = Math.floor(new Date().getTime() / 1000);
     const symbol = data.symbol.replace('/', '_');
