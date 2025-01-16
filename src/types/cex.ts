@@ -25,4 +25,16 @@ export interface IListenTicker {
   maxPrice: number;
   priceDiff: number;
   diffPercentage: number;
+  [key: string]: string | number;
 }
+export const CEX = Object.freeze({
+  BINANCE: 'binance',
+  OKX: 'okx',
+  MEXC: 'mexc',
+  KUCOIN: 'kucoin',
+  BITGET: 'bitget',
+  BYBIT: 'bybit',
+  HUOBI: 'huobi',
+  GATEIO: 'gateio',
+  LBANK: 'lbank',
+});

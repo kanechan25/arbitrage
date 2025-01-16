@@ -121,23 +121,23 @@ export class PricesService {
 
       this.logger.logInfo(` ${symbol}: Min: ${minPrice} (${minExchange}) | Max: ${maxPrice} (${maxExchange})`);
       this.logger.logInfo(`Price difference opportunity: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
-      // const exchangePrices = priceEntries.reduce(
-      //   (acc, entry) => ({
-      //     ...acc,
-      //     [entry.exchange]: entry.price,
-      //   }),
-      //   {},
-      // );
-      // this.logger.logPrices({
-      //   symbol,
-      //   minPrice,
-      //   maxPrice,
-      //   minExchange,
-      //   maxExchange,
-      //   priceDiff,
-      //   diffPercentage: Number(diffPercentage.toFixed(4)),
-      //   ...exchangePrices,
-      // });
+      const exchangePrices = priceEntries.reduce(
+        (acc, entry) => ({
+          ...acc,
+          [entry.exchange]: entry.price,
+        }),
+        {},
+      );
+      this.logger.logPrices({
+        symbol,
+        minPrice,
+        maxPrice,
+        minExchange,
+        maxExchange,
+        priceDiff,
+        diffPercentage: Number(diffPercentage.toFixed(4)),
+        ...exchangePrices,
+      });
       const configUsdtDiff = this.configService.get('usdt_price_diff')[symbol];
 
       if (priceDiff > configUsdtDiff) {
@@ -149,6 +149,7 @@ export class PricesService {
           maxPrice,
           priceDiff,
           diffPercentage,
+          ...exchangePrices,
         };
       }
     }

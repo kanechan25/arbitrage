@@ -1,4 +1,4 @@
-import { IListenTicker, ITicker } from '@/types/cex';
+import { CEX, IListenTicker, ITicker } from '@/types/cex';
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
@@ -52,13 +52,20 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
     try {
       while (this.isWatching) {
         const fetchTicker: IListenTicker | null = await this.pricesService.fetchSingleTicker(this.exchanges, symbol);
+        this.logger.log('__fetchTicker: ', fetchTicker);
+
         if (fetchTicker) {
-          // const balanceResult = await this.binanceService.convertQuoteToBase(symbol, 6);
-          // this.logger.log('balanceResult: ', balanceResult);
-          this.stopWatching();
+          // pass previous ETH price to check if it's profitable or it's changed
+          const balanceResult = await this.binanceService.convertQuoteToBase(
+            symbol,
+            6,
+            Number(fetchTicker[CEX.BINANCE]),
+          );
+          this.logger.log('__balanceResult: ', balanceResult);
+          // this.stopWatching();
         }
         // after all actions, delay
-        // await this.delay();
+        await this.delay();
       }
     } catch (error) {
       this.logger.error('Error in price watching loop:', error);

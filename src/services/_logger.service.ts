@@ -1,3 +1,4 @@
+import { IListenTicker } from '@/types/cex';
 import { Injectable } from '@nestjs/common';
 import * as winston from 'winston';
 const { combine, timestamp, json } = winston.format;
@@ -36,16 +37,7 @@ export class LoggerService {
     });
   }
 
-  logPrices(data: {
-    symbol: string;
-    minPrice: number;
-    maxPrice: number;
-    minExchange: string;
-    maxExchange: string;
-    priceDiff: number;
-    diffPercentage: number;
-    [key: string]: string | number;
-  }) {
+  logPrices(data: IListenTicker) {
     const timeNow = Math.floor(new Date().getTime() / 1000);
     const symbol = data.symbol.replace('/', '_');
 

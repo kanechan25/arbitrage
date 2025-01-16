@@ -42,7 +42,7 @@ export class BinanceService {
       };
     }
   }
-  async convertQuoteToBase(symbol: string, quoteUsdtAmount: number) {
+  async convertQuoteToBase(symbol: string, quoteAmount: number, watchedBasePrice: number) {
     try {
       // Get market info to check minimum notional
       const markets = await this.exchange.loadMarkets();
@@ -53,7 +53,7 @@ export class BinanceService {
       const currentPrice = ticker.last;
 
       // Calculate base amount
-      const baseAmount = quoteUsdtAmount / currentPrice;
+      const baseAmount = quoteAmount / currentPrice;
       // Check minimum notional (Binance requires min 5 USDT for most pairs)
       const notionalValue = baseAmount * currentPrice;
       if (notionalValue < market.limits.cost.min) {
@@ -61,23 +61,19 @@ export class BinanceService {
           `Order value (${notionalValue} USDT) is below minimum notional value of ${market.limits.cost.min} USDT`,
         );
       }
-      const order = await this.exchange.createMarketBuyOrder(symbol, baseAmount);
-      return {
-        success: true,
-        data: order,
-      };
+      console.log('__ convertQuoteToBase: ', { watchedBasePrice, currentPrice, baseAmount, notionalValue });
+      // const order = await this.exchange.createMarketBuyOrder(symbol, baseAmount);
+      // return {
+      //   success: true,
+      //   data: order,
+      // };
     } catch (error: any) {
-      // Enhanced error handling
       let errorMessage = 'An error occurred while placing the order.';
-
       if (error instanceof ccxt.BaseError) {
-        // Handle CCXT-specific errors
         errorMessage = `CCXT Error: ${error.message}`;
       } else if (error instanceof Error) {
-        // Handle general errors
         errorMessage = error.message;
       }
-
       return {
         success: false,
         error: errorMessage,
