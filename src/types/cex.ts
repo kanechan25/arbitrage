@@ -38,3 +38,11 @@ export const CEX = Object.freeze({
   GATEIO: 'gateio',
   LBANK: 'lbank',
 });
+export interface WithdrawParams {
+  coin: string;
+  amount: number;
+  address: string;
+  network?: string; // Specify network (e.g., 'ETH', 'BSC', 'TRX', etc.)
+  memo?: string; // Required for some coins like XRP
+  tag?: string; // Required for some coins
+}
