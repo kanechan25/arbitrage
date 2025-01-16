@@ -1,4 +1,4 @@
-import { ITicker } from '@/types/cex';
+import { IListenTicker, ITicker } from '@/types/cex';
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
@@ -46,17 +46,19 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
   async startWatching() {
     this.isWatching = true;
     const symbol: string = this.configService.get('symbol');
+    // const [base, quote] = symbol.split('/');
+
     // const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        await this.pricesService.fetchSingleTicker(this.exchanges, symbol);
-        // const balanceResult = await this.binanceService.fetchBalance(['ETH', 'USDT']);
-        // if (!balanceResult.success) {
-        //   console.error(`Failed to fetch balance: ${balanceResult.error}`);
-        //   continue;
-        // }
-        // this.logger.log('balanceResult: ', balanceResult);
-        await this.delay();
+        const fetchTicker: IListenTicker | null = await this.pricesService.fetchSingleTicker(this.exchanges, symbol);
+        if (fetchTicker) {
+          // const balanceResult = await this.binanceService.convertQuoteToBase(symbol, 6);
+          // this.logger.log('balanceResult: ', balanceResult);
+          this.stopWatching();
+        }
+        // after all actions, delay
+        // await this.delay();
       }
     } catch (error) {
       this.logger.error('Error in price watching loop:', error);
@@ -74,7 +76,7 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
 
   stopWatching() {
     this.isWatching = false;
-    this.logger.log('Stopping price watching');
+    this.logger.log('Stopping price watching ./.');
   }
   public getRecentTicks(): ITicker[] {
     return this.recentTicks;

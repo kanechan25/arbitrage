@@ -49,7 +49,12 @@ export default () => ({
     },
   ],
   usdt_amount: 100,
-  usdt_price_diff: 1, // diff in usd
+  usdt_price_diff: {
+    'BTC/USDT': 30,
+    'ETH/USDT': 1.0,
+    'BNB/USDT': 0.3,
+    'SOL/USDT': 0.05,
+  },
   min_profit_percentage: 1,
   fetch_delay_min: 1000,
   fetch_delay_max: 2000,
