@@ -128,18 +128,18 @@ export class PricesService {
         }),
         {},
       );
-      this.logger.logPrices({
-        symbol,
-        minPrice,
-        maxPrice,
-        minExchange,
-        maxExchange,
-        priceDiff,
-        diffPercentage: Number(diffPercentage.toFixed(4)),
-        ...exchangePrices,
-      });
-      const configUsdtDiff = this.configService.get('usdt_price_diff')[symbol];
+      // this.logger.logPrices({
+      //   symbol,
+      //   minPrice,
+      //   maxPrice,
+      //   minExchange,
+      //   maxExchange,
+      //   priceDiff,
+      //   diffPercentage: Number(diffPercentage.toFixed(4)),
+      //   ...exchangePrices,
+      // });
 
+      const configUsdtDiff = this.configService.get('usdt_price_diff')[symbol];
       if (priceDiff > configUsdtDiff) {
         return {
           symbol,
