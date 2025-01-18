@@ -1,4 +1,4 @@
-import { CEX, IListenTicker, ITicker } from '@/types/cex';
+import { ITicker } from '@/types/cex';
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
@@ -45,25 +45,23 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
 
   async startWatching() {
     this.isWatching = true;
-    const symbol: string = this.configService.get('symbol');
+    // const symbol: string = this.configService.get('symbol');
     // const [base, quote] = symbol.split('/');
 
     // const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        const fetchTicker: IListenTicker | null = await this.pricesService.fetchSingleTicker(this.exchanges, symbol);
-        this.logger.log('__fetchTicker: ', fetchTicker);
+        // const fetchTicker: IListenTicker | null = await this.pricesService.fetchSingleTicker(this.exchanges, symbol);
+        // this.logger.log('__fetchTicker: ', fetchTicker);
 
-        if (fetchTicker) {
-          // pass previous ETH price to check if it's profitable or it's changed
-          const balanceResult = await this.binanceService.convertQuoteToBase(
-            symbol,
-            6,
-            Number(fetchTicker[CEX.BINANCE]),
-          );
-          this.logger.log('__balanceResult: ', balanceResult);
-          // this.stopWatching();
-        }
+        // if (fetchTicker) {
+        // const balanceResult = await this.binanceService.spotQuoteToBase(symbol, 6, Number(fetchTicker[CEX.BINANCE]));
+        // this.logger.log('__balanceResult: ', balanceResult);
+        // this.stopWatching();
+        // }
+
+        this.stopWatching();
+
         // after all actions, delay
         await this.delay();
       }
