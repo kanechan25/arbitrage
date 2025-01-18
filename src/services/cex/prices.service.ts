@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
 import { LoggerService } from '@/services/_logger.service';
 import { IListenTicker, IMultiTickers, ITicker, ITickerRecords } from '@/types/cex';
-
+import { analyzeExchangeLog, ExchangeAnalysis } from '@/services/_exchangeStats';
 @Injectable()
 export class PricesService {
   private recentTicks: ITicker[] = [];
@@ -161,7 +161,9 @@ export class PricesService {
       this.recentTicks.shift();
     }
   }
-
+  async analyzeExchangeLog(logFilePath: string): Promise<ExchangeAnalysis> {
+    return analyzeExchangeLog(logFilePath);
+  }
   public getRecentTicks(): ITicker[] {
     return this.recentTicks;
   }

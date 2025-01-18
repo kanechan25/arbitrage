@@ -60,6 +60,9 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
         // this.stopWatching();
         // }
 
+        // const analysis = await this.pricesService.analyzeExchangeLog('logs/prices_ETH_USDT_1736868642.log');
+        // this.logger.log('__analysis: ', analysis);
+
         this.stopWatching();
 
         // after all actions, delay
