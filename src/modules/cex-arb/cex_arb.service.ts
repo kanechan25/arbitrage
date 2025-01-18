@@ -1,4 +1,4 @@
-import { CEX, IListenTicker, ITicker } from '@/types/cex';
+import { ITicker } from '@/types/cex';
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
@@ -60,13 +60,6 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
         // this.stopWatching();
         // }
 
-        // const withdrawResult = await this.binanceService.withdrawCrypto({
-        //   coin: 'USDT',
-        //   amount: 10.5,
-        //   address: '0x22a24dbec2d9cf058b6abf70f3778ada747deaaa',
-        //   network: 'BEP20',
-        // });
-        // this.logger.log('__withdrawResult: ', withdrawResult);
         this.stopWatching();
 
         // after all actions, delay

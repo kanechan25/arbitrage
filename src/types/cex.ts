@@ -31,18 +31,27 @@ export const CEX = Object.freeze({
   BINANCE: 'binance',
   OKX: 'okx',
   MEXC: 'mexc',
-  KUCOIN: 'kucoin',
   BITGET: 'bitget',
   BYBIT: 'bybit',
   HUOBI: 'huobi',
   GATEIO: 'gateio',
+  KUCOIN: 'kucoin',
   LBANK: 'lbank',
 });
+
+export const CHAINS = Object.freeze({
+  BSC: 'BEP20',
+  ARB: 'ARBITRUM',
+  TRON: 'TRC20',
+  OPTIMISM: 'OPTIMISM',
+  BASE: 'BASE',
+});
+
 export interface WithdrawParams {
   coin: string;
   amount: number;
   address: string;
-  network?: string; // Specify network (e.g., 'ETH', 'BSC', 'TRX', etc.)
+  network: string; // Specify network from CHAINS{}
   memo?: string; // Required for some coins like XRP
   tag?: string; // Required for some coins
 }

@@ -1,3 +1,4 @@
+import { depositWallets } from '@/config/wallets';
 import { WithdrawParams } from '@/types/cex';
 import { Injectable } from '@nestjs/common';
 import * as ccxt from 'ccxt';
@@ -90,7 +91,6 @@ export class BinanceService {
         throw new Error(`Withdrawals for ${params.coin} are currently disabled`);
       }
 
-      // Get withdrawal fee and limits
       const networks = coinInfo.networks;
       let selectedNetwork = null;
 
@@ -100,7 +100,6 @@ export class BinanceService {
           throw new Error(`Network ${params.network} not found for ${params.coin}`);
         }
       } else {
-        // Use default network if none specified
         selectedNetwork = Object.values(networks)[0];
       }
 
@@ -110,8 +109,7 @@ export class BinanceService {
           `Amount ${params.amount} is below minimum withdrawal of ${selectedNetwork.withdrawMin} ${params.coin}`,
         );
       }
-      // 0x22a24dbec2d9cf058b6abf70f3778ada747deaaa mexc usdt bsc
-      // Perform withdrawal
+
       const withdrawal = await this.exchange.withdraw(params.coin, params.amount, params.address, params.tag, {
         network: params.network,
         memo: params.memo,
@@ -159,6 +157,38 @@ export class BinanceService {
       return {
         success: false,
         error: error.message,
+      };
+    }
+  }
+  async deposit2Wallets() {
+    try {
+      const results: Record<string, any> = {};
+      await Promise.all(
+        depositWallets.map(async (wallet) => {
+          // Only process if amount is greater than 0
+          if (wallet.amount > 0) {
+            const withdrawResult = await this.withdrawCrypto({
+              coin: wallet.coin,
+              amount: wallet.amount,
+              address: wallet.address,
+              network: wallet.network,
+            });
+            results[wallet.platform] = withdrawResult;
+          } else {
+            results[wallet.platform] = {};
+          }
+        }),
+      );
+      return {
+        success: true,
+        error: null,
+        data: results,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+        data: {},
       };
     }
   }
