@@ -165,7 +165,6 @@ export class BinanceService {
       const results: Record<string, any> = {};
       await Promise.all(
         depositWallets.map(async (wallet) => {
-          // Only process if amount is greater than 0
           if (wallet.amount > 0) {
             const withdrawResult = await this.withdrawCrypto({
               coin: wallet.coin,

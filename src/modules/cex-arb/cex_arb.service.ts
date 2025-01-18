@@ -55,8 +55,6 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
         // this.logger.log('__fetchTicker: ', fetchTicker);
 
         // if (fetchTicker) {
-        // const balanceResult = await this.binanceService.spotQuoteToBase(symbol, 6, Number(fetchTicker[CEX.BINANCE]));
-        // this.logger.log('__balanceResult: ', balanceResult);
         // this.stopWatching();
         // }
 
