@@ -16,6 +16,7 @@ export class PricesService {
   async fetchMultipleTickers(exchanges: Map<string, ccxt.Exchange>, symbols: string[]): Promise<ITickerRecords[]> {
     const tickerPromises = Array.from(exchanges.entries()).map(
       async ([exchangeName, exchange]): Promise<IMultiTickers> => {
+        await this.delay();
         try {
           const tickers = await exchange.fetchTickers(symbols);
           if (!tickers) {
@@ -155,6 +156,14 @@ export class PricesService {
     }
     return null;
   }
+  private async delay(): Promise<void> {
+    const delay_min: number = this.configService.get('fetch_delay_min');
+    const delay_max: number = this.configService.get('fetch_delay_max');
+    const delay = Math.floor(Math.random() * (delay_max - delay_min)) + delay_min;
+    this.logger.logInfo(`____________________________________delay: ${delay}`);
+    await new Promise((resolve) => setTimeout(resolve, delay));
+  }
+
   private storeTickData(tickData: ITicker): void {
     this.recentTicks.push(tickData);
     if (this.recentTicks.length > 100) {

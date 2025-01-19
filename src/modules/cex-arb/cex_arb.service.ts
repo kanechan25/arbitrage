@@ -55,34 +55,22 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
     const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        const fetchTicker = await this.pricesService.fetchMultipleTickers(this.exchanges, symbols);
-        this.logger.log('__fetchTicker: ', fetchTicker);
+        await this.pricesService.fetchMultipleTickers(this.exchanges, symbols);
+
         // const balance = await this.bitgetService.fetchBalance(['USDT', 'ETH']);
         // this.logger.log('__balance: ', balance);
         // if (fetchTicker) {
         // this.stopWatching();
         // }
 
-        // const analysis = await this.pricesService.analyzeExchangeLog('logs/prices_ETH_USDT_1736868642.log');
+        // const analysis = await this.pricesService.analyzeExchangeLog('logs/prices_BTC_USDT_1737173052.log');
         // this.logger.log('__analysis: ', analysis);
-
-        this.stopWatching();
-
-        // after all actions, delay
-        await this.delay();
+        // this.stopWatching();
       }
     } catch (error) {
       this.logger.error('Error in price watching loop:', error);
       this.isWatching = false;
     }
-  }
-
-  private async delay(): Promise<void> {
-    const delay_min: number = this.configService.get('fetch_delay_min');
-    const delay_max: number = this.configService.get('fetch_delay_max');
-    const delay = Math.floor(Math.random() * (delay_max - delay_min)) + delay_min;
-    this.logger.log(`____________________________________delay: ${delay}`);
-    await new Promise((resolve) => setTimeout(resolve, delay));
   }
 
   stopWatching() {
