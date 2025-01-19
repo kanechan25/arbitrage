@@ -16,13 +16,7 @@ export class OkxService {
   async fetchBalance(symbol?: string[]) {
     try {
       const balance = await this.exchange.fetchBalance();
-      if (symbol && symbol.length === 1) {
-        return {
-          success: true,
-          data: balance[symbol[0]] || { free: 0, used: 0, total: 0 },
-        };
-      }
-      if (symbol && symbol.length > 1) {
+      if (symbol) {
         return {
           success: true,
           data: symbol.map((sym) => balance[sym] || { free: 0, used: 0, total: 0 }),
