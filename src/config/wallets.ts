@@ -1,4 +1,4 @@
-import { CEX, CHAINS } from '@/types/cex';
+import { CEX, CHAINS } from '@/types/cex.types';
 
 export const WALLETS = Object.freeze({
   [CEX.BINANCE]: {

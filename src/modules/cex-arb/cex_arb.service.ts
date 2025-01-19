@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
-import { ITicker } from '@/types/cex';
+import { ITicker } from '@/types/cex.types';
 import { PricesService } from '@/services/cex/prices.service';
 import { BinanceService } from '@/services/cex/binance/binance.service';
 import { BitgetService } from '@/services/cex/bitget/bitget.service';
@@ -52,13 +52,13 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
     // const symbol: string = this.configService.get('symbol');
     // const [base, quote] = symbol.split('/');
 
-    // const symbols: string[] = this.configService.get('symbols');
+    const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        // const fetchTicker: IListenTicker | null = await this.pricesService.fetchSingleTicker(this.exchanges, symbol);
-        // this.logger.log('__fetchTicker: ', fetchTicker);
-        const balance = await this.bitgetService.fetchBalance(['USDT', 'ETH']);
-        this.logger.log('__balance: ', balance);
+        const fetchTicker = await this.pricesService.fetchMultipleTickers(this.exchanges, symbols);
+        this.logger.log('__fetchTicker: ', fetchTicker);
+        // const balance = await this.bitgetService.fetchBalance(['USDT', 'ETH']);
+        // this.logger.log('__balance: ', balance);
         // if (fetchTicker) {
         // this.stopWatching();
         // }

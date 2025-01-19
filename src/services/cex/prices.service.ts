@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
 import { LoggerService } from '@/services/_logger.service';
-import { IListenTicker, IMultiTickers, ITicker, ITickerRecords } from '@/types/cex';
+import { IListenTicker, IMultiTickers, ITicker, ITickerRecords } from '@/types/cex.types';
 import { analyzeExchangeLog, ExchangeAnalysis } from '@/services/_exchangeStats';
 @Injectable()
 export class PricesService {
@@ -128,16 +128,16 @@ export class PricesService {
         }),
         {},
       );
-      // this.logger.logPrices({
-      //   symbol,
-      //   minPrice,
-      //   maxPrice,
-      //   minExchange,
-      //   maxExchange,
-      //   priceDiff,
-      //   diffPercentage: Number(diffPercentage.toFixed(4)),
-      //   ...exchangePrices,
-      // });
+      this.logger.logPrices({
+        symbol,
+        minPrice,
+        maxPrice,
+        minExchange,
+        maxExchange,
+        priceDiff,
+        diffPercentage: Number(diffPercentage.toFixed(4)),
+        ...exchangePrices,
+      });
 
       const configUsdtDiff = this.configService.get('usdt_price_diff')[symbol];
       if (priceDiff > configUsdtDiff) {

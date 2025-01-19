@@ -1,4 +1,4 @@
-import { IListenTicker } from '@/types/cex';
+import { IListenTicker } from '@/types/cex.types';
 import { Injectable } from '@nestjs/common';
 import * as winston from 'winston';
 const { combine, timestamp, json } = winston.format;

@@ -1,5 +1,5 @@
 import { depositWallets } from '@/config/wallets';
-import { WithdrawParams } from '@/types/cex';
+import { WithdrawParams } from '@/types/cex.types';
 import { Injectable } from '@nestjs/common';
 import * as ccxt from 'ccxt';
 

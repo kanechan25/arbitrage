@@ -1,4 +1,4 @@
-import { IListenTicker } from '@/types/cex';
+import { IListenTicker } from '@/types/cex.types';
 import { createLogger, transports, format } from 'winston';
 
 export interface ExchangeStats {
