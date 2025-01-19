@@ -4,16 +4,18 @@ import { Injectable } from '@nestjs/common';
 import * as ccxt from 'ccxt';
 
 @Injectable()
-export class BinanceService {
-  private exchange: ccxt.binance;
+export class BitgetService {
+  private exchange: ccxt.bitget;
 
   constructor() {
-    this.exchange = new ccxt.binance({
-      apiKey: process.env.BINANCE_API_KEY,
-      secret: process.env.BINANCE_API_SECRET,
-      enableRateLimit: true, // Helps to respect Binance's rate limits
+    this.exchange = new ccxt.bitget({
+      apiKey: process.env.BITGET_API_KEY,
+      secret: process.env.BITGET_API_SECRET,
+      password: process.env.BITGET_PASSWORD,
+      enableRateLimit: true, // Helps to respect Bitget's rate limits
     });
   }
+
   async fetchBalance(symbol?: string[]) {
     try {
       const balance = await this.exchange.fetchBalance();
@@ -28,12 +30,14 @@ export class BinanceService {
         data: balance,
       };
     } catch (error) {
+      console.log('__error: ', error);
       return {
         success: false,
         error: error.message,
       };
     }
   }
+
   async spotQuoteToBase(symbol: string, quoteAmount: number, watchedBasePrice: number) {
     try {
       // Get market info to check minimum notional
@@ -44,7 +48,7 @@ export class BinanceService {
       const currentPrice = ticker.last;
 
       const baseAmount = quoteAmount / currentPrice;
-      // Check minimum notional (Binance requires min 5 USDT for most pairs)
+      // Check minimum notional (Bitget requires min 5 USDT for most pairs)
       const notionalValue = baseAmount * currentPrice;
       if (notionalValue < market.limits.cost.min) {
         throw new Error(

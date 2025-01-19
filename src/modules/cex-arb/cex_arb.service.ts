@@ -1,9 +1,11 @@
-import { ITicker } from '@/types/cex';
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
-import { BinanceService } from '@/services/cex/binance/binance.service';
+import { ITicker } from '@/types/cex.types';
 import { PricesService } from '@/services/cex/prices.service';
+import { BinanceService } from '@/services/cex/binance/binance.service';
+import { BitgetService } from '@/services/cex/bitget/bitget.service';
+import { OkxService } from '@/services/cex/okx/okx.service';
 
 @Injectable()
 export class CexArbService implements OnModuleInit, OnModuleDestroy {
@@ -14,6 +16,8 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
 
   constructor(
     private binanceService: BinanceService,
+    private okxService: OkxService,
+    private bitgetService: BitgetService,
     private configService: ConfigService,
     private pricesService: PricesService,
   ) {
@@ -48,17 +52,19 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
     // const symbol: string = this.configService.get('symbol');
     // const [base, quote] = symbol.split('/');
 
-    // const symbols: string[] = this.configService.get('symbols');
+    const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        // const fetchTicker: IListenTicker | null = await this.pricesService.fetchSingleTicker(this.exchanges, symbol);
-        // this.logger.log('__fetchTicker: ', fetchTicker);
-
+        const fetchTicker = await this.pricesService.fetchMultipleTickers(this.exchanges, symbols);
+        this.logger.log('__fetchTicker: ', fetchTicker);
+        // const balance = await this.bitgetService.fetchBalance(['USDT', 'ETH']);
+        // this.logger.log('__balance: ', balance);
         // if (fetchTicker) {
-        // const balanceResult = await this.binanceService.spotQuoteToBase(symbol, 6, Number(fetchTicker[CEX.BINANCE]));
-        // this.logger.log('__balanceResult: ', balanceResult);
         // this.stopWatching();
         // }
+
+        // const analysis = await this.pricesService.analyzeExchangeLog('logs/prices_ETH_USDT_1736868642.log');
+        // this.logger.log('__analysis: ', analysis);
 
         this.stopWatching();
 
