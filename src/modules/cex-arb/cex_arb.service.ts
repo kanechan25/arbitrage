@@ -66,6 +66,7 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
         // const analysis = await this.pricesService.analyzeExchangeLog('logs/prices_BTC_USDT_1737173052.log');
         // this.logger.log('__analysis: ', analysis);
         // this.stopWatching();
+        await this.pricesService.delay();
       }
     } catch (error) {
       this.logger.error('Error in price watching loop:', error);
