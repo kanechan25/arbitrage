@@ -16,7 +16,6 @@ export class PricesService {
   async fetchMultipleTickers(exchanges: Map<string, ccxt.Exchange>, symbols: string[]): Promise<ITickerRecords[]> {
     const tickerPromises = Array.from(exchanges.entries()).map(
       async ([exchangeName, exchange]): Promise<IMultiTickers> => {
-        // await this.delay();
         try {
           const tickers = await exchange.fetchTickers(symbols);
           if (!tickers) {

@@ -123,7 +123,6 @@ export class BinanceService {
       };
     }
   }
-  // Helper function to get withdrawal fees and limits for a specific coin
   async getWithdrawalInfo(coin: string) {
     try {
       const currencies = await this.exchange.fetchCurrencies();
