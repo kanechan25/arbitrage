@@ -1,21 +1,32 @@
 import { IListenTicker } from '@/types/cex.types';
 import { createLogger, transports, format } from 'winston';
+import { ConfigService } from '@nestjs/config';
+import { calculateAverageTime, calculateTimeDifference } from '@/utils';
 
-export interface ExchangeStats {
+export interface IExchangeStats {
   maxExCount: number;
   maxExPct: number;
   minExCount: number;
   minExPct: number;
 }
 
-export interface ExchangeAnalysis {
+export interface IExchangeAnalysis {
   totalRows: number;
   exchanges: {
-    [key: string]: ExchangeStats;
+    [key: string]: IExchangeStats;
   };
+  startTimestamp: number | string;
+  endTimestamp: number | string;
+  duration: string;
+  satisfiedPctCount: number;
+  averageSatisfiedTime: string;
+  symbol: string;
 }
 
-export async function analyzeExchangeLog(logFilePath: string): Promise<ExchangeAnalysis> {
+export async function analyzeExchangeLog(
+  logFilePath: string,
+  configService: ConfigService,
+): Promise<IExchangeAnalysis> {
   // Create a Winston logger instance
   const logger = createLogger({
     transports: [
@@ -26,7 +37,7 @@ export async function analyzeExchangeLog(logFilePath: string): Promise<ExchangeA
     ],
   });
   // Initialize result object
-  const result: ExchangeAnalysis = {
+  const result: IExchangeAnalysis = {
     totalRows: 0,
     exchanges: {
       binance: { maxExCount: 0, maxExPct: 0, minExCount: 0, minExPct: 0 },
@@ -39,8 +50,14 @@ export async function analyzeExchangeLog(logFilePath: string): Promise<ExchangeA
       mexc: { maxExCount: 0, maxExPct: 0, minExCount: 0, minExPct: 0 },
       okx: { maxExCount: 0, maxExPct: 0, minExCount: 0, minExPct: 0 },
     },
+    startTimestamp: '',
+    endTimestamp: '',
+    duration: '',
+    satisfiedPctCount: 0,
+    averageSatisfiedTime: '',
+    symbol: '',
   };
-
+  const configUsdtDiff = configService.get('min_profit_percentage');
   return new Promise((resolve, reject) => {
     logger.query(
       {
@@ -48,7 +65,7 @@ export async function analyzeExchangeLog(logFilePath: string): Promise<ExchangeA
         from: new Date(0),
         until: new Date(),
         order: 'asc',
-        fields: ['maxExchange', 'minExchange'],
+        fields: ['maxExchange', 'minExchange', 'diffPercentage', 'timestamp', 'symbol'],
       },
       (err, results) => {
         if (err) {
@@ -69,7 +86,9 @@ export async function analyzeExchangeLog(logFilePath: string): Promise<ExchangeA
             }
 
             if (data && data?.maxExchange && data?.minExchange) {
-              result.totalRows++;
+              if (data.diffPercentage && data.diffPercentage > configUsdtDiff) {
+                result.satisfiedPctCount++;
+              }
               if (result.exchanges[data?.maxExchange]) {
                 result.exchanges[data?.maxExchange].maxExCount++;
               }
@@ -83,6 +102,12 @@ export async function analyzeExchangeLog(logFilePath: string): Promise<ExchangeA
           }
         }
 
+        result.symbol = logEntries[logEntries.length - 1]?.symbol;
+        result.totalRows = logEntries.length;
+        result.startTimestamp = logEntries[0]?.timestamp;
+        result.endTimestamp = logEntries[logEntries.length - 1]?.timestamp;
+        result.duration = calculateTimeDifference(result.endTimestamp.toString(), result.startTimestamp.toString());
+        result.averageSatisfiedTime = calculateAverageTime(result.satisfiedPctCount, result.duration);
         // Calculate percentages only if we have data
         if (result.totalRows > 0) {
           Object.keys(result.exchanges).forEach((exchange) => {

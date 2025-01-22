@@ -55,7 +55,7 @@ export default () => ({
     'BNB/USDT': 0.3,
     'SOL/USDT': 0.05,
   },
-  min_profit_percentage: 1,
+  min_profit_percentage: 0.2,
   fetch_delay_min: 1000,
   fetch_delay_max: 2000,
 });
