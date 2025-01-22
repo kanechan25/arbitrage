@@ -27,6 +27,27 @@ export interface IListenTicker {
   diffPercentage: number;
   [key: string]: string | number;
 }
+
+interface IExchangeStats {
+  maxExCount: number;
+  maxExPct: number;
+  minExCount: number;
+  minExPct: number;
+}
+
+export interface IExchangeAnalysis {
+  symbol: string;
+  totalRows: number;
+  satisfiedPctCount: number;
+  averageSatisfiedTime: string;
+  startTimestamp: number | string;
+  endTimestamp: number | string;
+  duration: string;
+  exchanges: {
+    [key: string]: IExchangeStats;
+  };
+}
+
 export const CEX = Object.freeze({
   BINANCE: 'binance',
   OKX: 'okx',

@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
 import { LoggerService } from '@/services/_logger.service';
-import { IListenTicker, IMultiTickers, ITicker, ITickerRecords } from '@/types/cex.types';
-import { analyzeExchangeLog, IExchangeAnalysis } from '@/services/_exchangeStats';
+import { IListenTicker, IMultiTickers, ITicker, ITickerRecords, IExchangeAnalysis } from '@/types/cex.types';
+import { analyzeExchangeLog } from '@/services/_exchangeStats';
 @Injectable()
 export class PricesService {
   private recentTicks: ITicker[] = [];
@@ -169,8 +169,15 @@ export class PricesService {
       this.recentTicks.shift();
     }
   }
-  async analyzeExchangeLog(logFilePath: string): Promise<IExchangeAnalysis> {
-    return analyzeExchangeLog(logFilePath, this.configService);
+  async analyzeExchangeLog(logFilePaths: string[], isCheckExchange: boolean = false): Promise<IExchangeAnalysis[]> {
+    const analysisPromises = logFilePaths.map(async (logFilePath) => {
+      const analysis = await analyzeExchangeLog(logFilePath, this.configService);
+      if (isCheckExchange) {
+        return analysis;
+      }
+      return { ...analysis, exchanges: {} };
+    });
+    return Promise.all(analysisPromises);
   }
   public getRecentTicks(): ITicker[] {
     return this.recentTicks;

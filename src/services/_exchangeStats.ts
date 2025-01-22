@@ -1,27 +1,7 @@
-import { IListenTicker } from '@/types/cex.types';
+import { IExchangeAnalysis, IListenTicker } from '@/types/cex.types';
 import { createLogger, transports, format } from 'winston';
 import { ConfigService } from '@nestjs/config';
 import { calculateAverageTime, calculateTimeDifference } from '@/utils';
-
-export interface IExchangeStats {
-  maxExCount: number;
-  maxExPct: number;
-  minExCount: number;
-  minExPct: number;
-}
-
-export interface IExchangeAnalysis {
-  totalRows: number;
-  exchanges: {
-    [key: string]: IExchangeStats;
-  };
-  startTimestamp: number | string;
-  endTimestamp: number | string;
-  duration: string;
-  satisfiedPctCount: number;
-  averageSatisfiedTime: string;
-  symbol: string;
-}
 
 export async function analyzeExchangeLog(
   logFilePath: string,

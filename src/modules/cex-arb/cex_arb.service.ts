@@ -6,6 +6,7 @@ import { PricesService } from '@/services/cex/prices.service';
 import { BinanceService } from '@/services/cex/binance/binance.service';
 import { BitgetService } from '@/services/cex/bitget/bitget.service';
 import { OkxService } from '@/services/cex/okx/okx.service';
+import { LOG_PATHS } from '@/constants';
 
 @Injectable()
 export class CexArbService implements OnModuleInit, OnModuleDestroy {
@@ -63,7 +64,7 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
         // this.stopWatching();
         // }
 
-        const analysis = await this.pricesService.analyzeExchangeLog('logs/prices_SOL_USDT_1737306033.log');
+        const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS);
         this.logger.log('__analysis: ', analysis);
 
         this.stopWatching();
