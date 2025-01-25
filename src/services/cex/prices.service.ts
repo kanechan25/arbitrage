@@ -13,7 +13,11 @@ export class PricesService {
     private logger: LoggerService,
   ) {}
 
-  async fetchMultipleTickers(exchanges: Map<string, ccxt.Exchange>, symbols: string[]): Promise<ITickerRecords[]> {
+  async fetch_findOp_log_Tickers(
+    exchanges: Map<string, ccxt.Exchange>,
+    symbols: string[],
+    isLogger: boolean,
+  ): Promise<IListenTicker[] | null> {
     const tickerPromises = Array.from(exchanges.entries()).map(
       async ([exchangeName, exchange]): Promise<IMultiTickers> => {
         try {
@@ -44,19 +48,27 @@ export class PricesService {
         last: result.tickers[symbol].last,
       })),
     }));
-
-    if (validResults.length > 0) {
-      validResults.map((validResult) => {
-        Object.values(validResult).map((results) => {
-          this.analyzePrices(results);
-        });
-      });
-    } else {
-      this.logger.logWarning('No valid ticker data received from any exchange');
-    }
-    return validResults;
+    return await this.find_log_tickersOptnt(validResults, isLogger);
   }
 
+  async find_log_tickersOptnt(
+    fetchPriceResults: ITickerRecords[],
+    isLogger: boolean = false,
+  ): Promise<IListenTicker[] | null> {
+    if (fetchPriceResults.length > 0) {
+      const results = fetchPriceResults
+        .map((validResult) => {
+          return Object.values(validResult).map((results) => this.analyzePrices(results, isLogger))[0];
+        })
+        .filter((result): result is IListenTicker => result !== null);
+      return results.length > 0 ? results : null;
+    } else {
+      this.logger.logWarning('No valid ticker data received from any exchange');
+      return null;
+    }
+  }
+
+  // TODO: fetchSingleTicker deprecated 25 Jan 2025
   async fetchSingleTicker(exchanges: Map<string, ccxt.Exchange>, symbol: string): Promise<IListenTicker | null> {
     const tickerPromises = Array.from(exchanges.entries()).map(async ([exchangeName, exchange]): Promise<ITicker> => {
       try {
@@ -89,7 +101,7 @@ export class PricesService {
     }
   }
 
-  private analyzePrices(results: ITicker[]): IListenTicker | null {
+  private analyzePrices(results: ITicker[], isLogger: boolean = false): IListenTicker | null {
     const priceEntries = results
       .filter((result) => result.ticker?.last)
       .map((result) => ({
@@ -97,7 +109,6 @@ export class PricesService {
         symbol: result.ticker.symbol,
         price: result.ticker.last,
       }));
-
     if (priceEntries.length >= 2) {
       const { symbol, minExchange, minPrice, maxExchange, maxPrice } = priceEntries.reduce(
         (acc, entry) => ({
@@ -128,19 +139,22 @@ export class PricesService {
         }),
         {},
       );
-      this.logger.logPrices({
-        symbol,
-        minPrice,
-        maxPrice,
-        minExchange,
-        maxExchange,
-        priceDiff,
-        diffPercentage: Number(diffPercentage.toFixed(4)),
-        ...exchangePrices,
-      });
-
-      const configUsdtDiff = this.configService.get('usdt_price_diff')[symbol];
-      if (priceDiff > configUsdtDiff) {
+      if (isLogger) {
+        this.logger.logPrices({
+          symbol,
+          minPrice,
+          maxPrice,
+          minExchange,
+          maxExchange,
+          priceDiff,
+          diffPercentage: Number(diffPercentage.toFixed(4)),
+          ...exchangePrices,
+        });
+      }
+      // If the price difference is greater than the configured minimum profit percentage, return the opportunity
+      const configProfitPctDiff = this.configService.get('min_profit_percentage')[symbol];
+      if (diffPercentage > configProfitPctDiff) {
+        this.logger.logInfo(`____Found out an opportunity: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
         return {
           symbol,
           minExchange,
@@ -151,9 +165,13 @@ export class PricesService {
           diffPercentage,
           ...exchangePrices,
         };
+      } else {
+        this.logger.logInfo(`____No opportunity found: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
+        return null;
       }
+    } else {
+      return null;
     }
-    return null;
   }
   async delay(): Promise<void> {
     const delay_min: number = this.configService.get('fetch_delay_min');

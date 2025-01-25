@@ -37,7 +37,6 @@ export async function analyzeExchangeLog(
     averageSatisfiedTime: '',
     symbol: '',
   };
-  const configUsdtDiff = configService.get('min_profit_percentage');
   return new Promise((resolve, reject) => {
     logger.query(
       {
@@ -53,6 +52,9 @@ export async function analyzeExchangeLog(
           return;
         }
         const logEntries = results.file || [];
+        result.symbol = logEntries[logEntries.length - 1]?.symbol;
+        const configProfitPctDiff = configService.get('min_profit_percentage')[result.symbol];
+
         for (const entry of logEntries) {
           try {
             // Debug log to see the raw entry
@@ -66,7 +68,7 @@ export async function analyzeExchangeLog(
             }
 
             if (data && data?.maxExchange && data?.minExchange) {
-              if (data.diffPercentage && data.diffPercentage > configUsdtDiff) {
+              if (data.diffPercentage && data.diffPercentage > configProfitPctDiff) {
                 result.satisfiedPctCount++;
               }
               if (result.exchanges[data?.maxExchange]) {
@@ -82,7 +84,6 @@ export async function analyzeExchangeLog(
           }
         }
 
-        result.symbol = logEntries[logEntries.length - 1]?.symbol;
         result.totalRows = logEntries.length;
         result.startTimestamp = logEntries[0]?.timestamp;
         result.endTimestamp = logEntries[logEntries.length - 1]?.timestamp;

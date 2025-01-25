@@ -56,13 +56,8 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
     const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        await this.pricesService.fetchMultipleTickers(this.exchanges, symbols);
-
-        // const balance = await this.bitgetService.fetchBalance(['USDT', 'ETH']);
-        // this.logger.log('__balance: ', balance);
-        // if (fetchTicker) {
-        // this.stopWatching();
-        // }
+        const results = await this.pricesService.fetch_findOp_log_Tickers(this.exchanges, symbols, false);
+        this.logger.log('__justFindOutTickersOptnt: ', results);
 
         // const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS);
         // this.logger.log('__analysis: ', analysis);
