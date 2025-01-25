@@ -6,7 +6,7 @@ import { PricesService } from '@/services/cex/prices.service';
 import { BinanceService } from '@/services/cex/binance/binance.service';
 import { BitgetService } from '@/services/cex/bitget/bitget.service';
 import { OkxService } from '@/services/cex/okx/okx.service';
-import { LOG_PATHS } from '@/constants';
+// import { LOG_PATHS } from '@/constants';
 
 @Injectable()
 export class CexArbService implements OnModuleInit, OnModuleDestroy {
@@ -53,10 +53,10 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
     // const symbol: string = this.configService.get('symbol');
     // const [base, quote] = symbol.split('/');
 
-    // const symbols: string[] = this.configService.get('symbols');
+    const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        // await this.pricesService.fetchMultipleTickers(this.exchanges, symbols);
+        await this.pricesService.fetchMultipleTickers(this.exchanges, symbols);
 
         // const balance = await this.bitgetService.fetchBalance(['USDT', 'ETH']);
         // this.logger.log('__balance: ', balance);
@@ -64,11 +64,11 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
         // this.stopWatching();
         // }
 
-        const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS);
-        this.logger.log('__analysis: ', analysis);
+        // const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS);
+        // this.logger.log('__analysis: ', analysis);
 
-        this.stopWatching();
-        // await this.pricesService.delay();
+        // this.stopWatching();
+        await this.pricesService.delay();
       }
     } catch (error) {
       this.logger.error('Error in price watching loop:', error);

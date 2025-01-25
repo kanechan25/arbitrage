@@ -1,6 +1,6 @@
 export default () => ({
   symbol: 'ETH/USDT',
-  symbols: ['BTC/USDT', 'ADA/USDT', 'BNB/USDT', 'SOL/USDT'],
+  symbols: ['ADA/USDT', 'SOL/USDT'],
   exchanges: [
     {
       name: 'binance',
