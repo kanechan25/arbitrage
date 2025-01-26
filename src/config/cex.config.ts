@@ -1,10 +1,11 @@
 export default () => ({
   symbol: 'ETH/USDT',
-  symbols: ['TRUMP/USDT', 'SOL/USDT', 'ADA/USDT'],
+  symbols: ['TRUMP/USDT', 'DOGE/USDT', 'SUI/USDT', 'XRP/USDT'],
   min_profit_percentage: {
     'TRUMP/USDT': 0.01,
-    'SOL/USDT': 0.01,
-    'ADA/USDT': 0.01,
+    'DOGE/USDT': 0.01,
+    'SUI/USDT': 0.01,
+    'XRP/USDT': 0.01,
   },
   exchanges: [
     {
