@@ -55,29 +55,17 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
     // const symbol: string = this.configService.get('symbol');
     // const [base, quote] = symbol.split('/');
 
-    // const symbols: string[] = this.configService.get('symbols');
+    const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        // const results = await this.pricesService.fetch_findOp_log_Tickers(this.exchanges, symbols, false);
-        // this.logger.log('__justFindOutTickersOptnt: ', results);
-
-        const binanceBalance = await this.binanceService.fetchBalance(['USDT', 'ETH'], 'spot');
-        this.logger.log('__binanceBalance: ', binanceBalance);
-
-        // const okxBalance = await this.okxService.fetchBalance(['USDT', 'ETH', 'MERL'], 'spot');
-        // this.logger.log('__okxBalance: ', okxBalance);
-
-        // const bitgetBalance = await this.bitgetService.fetchBalance(['USDT', 'ETH'], 'spot');
-        // this.logger.log('__bitgetBalance: ', bitgetBalance);
-
-        // const bybitBalance = await this.bybitService.fetchBalance(['USDT', 'DOGE'], 'spot');
-        // this.logger.log('__bybitBalance: ', bybitBalance);
+        const results = await this.pricesService.fetch_findOp_log_Tickers(this.exchanges, symbols, false);
+        this.logger.log('__justFindOutTickersOptnt: ', results);
 
         // const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS);
         // this.logger.log('__analysis: ', analysis);
 
-        this.stopWatching();
-        // await this.pricesService.delay();
+        // this.stopWatching();
+        await this.pricesService.delay();
       }
     } catch (error) {
       this.logger.error('Error in price watching loop:', error);
