@@ -1,6 +1,12 @@
 export default () => ({
   symbol: 'ETH/USDT',
-  symbols: ['ADA/USDT', 'SOL/USDT'],
+  symbols: ['TRUMP/USDT', 'DOGE/USDT', 'SUI/USDT', 'XRP/USDT'],
+  min_profit_percentage: {
+    'TRUMP/USDT': 0.01,
+    'DOGE/USDT': 0.01,
+    'SUI/USDT': 0.01,
+    'XRP/USDT': 0.01,
+  },
   exchanges: [
     {
       name: 'binance',
@@ -37,25 +43,21 @@ export default () => ({
       apiKey: process.env.HUOBI_API_KEY,
       apiSecret: process.env.HUOBI_API_SECRET,
     },
-    {
-      name: 'gateio',
-      apiKey: process.env.GATEIO_API_KEY,
-      apiSecret: process.env.GATEIO_API_SECRET,
-    },
-    {
-      name: 'lbank',
-      apiKey: process.env.LBANK_API_KEY,
-      apiSecret: process.env.LBANK_API_SECRET,
-    },
+    // {
+    //   name: 'gateio',
+    //   apiKey: process.env.GATEIO_API_KEY,
+    //   apiSecret: process.env.GATEIO_API_SECRET,
+    // },
+    // {
+    //   name: 'lbank',
+    //   apiKey: process.env.LBANK_API_KEY,
+    //   apiSecret: process.env.LBANK_API_SECRET,
+    // },
   ],
   usdt_amount: 100,
-  usdt_price_diff: {
-    'BTC/USDT': 30,
-    'ETH/USDT': 1.0,
-    'BNB/USDT': 0.3,
+  min_usdt_price_diff: {
     'SOL/USDT': 0.05,
   },
-  min_profit_percentage: 0.2,
-  fetch_delay_min: 1000,
-  fetch_delay_max: 2000,
+  fetch_delay_min: 3000,
+  fetch_delay_max: 5400,
 });

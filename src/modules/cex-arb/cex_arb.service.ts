@@ -5,6 +5,7 @@ import { ITicker } from '@/types/cex.types';
 import { PricesService } from '@/services/cex/prices.service';
 import { BinanceService } from '@/services/cex/binance/binance.service';
 import { BitgetService } from '@/services/cex/bitget/bitget.service';
+import { BybitService } from '@/services/cex/bybit/bybit.service';
 import { OkxService } from '@/services/cex/okx/okx.service';
 // import { LOG_PATHS } from '@/constants';
 
@@ -19,6 +20,7 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
     private binanceService: BinanceService,
     private okxService: OkxService,
     private bitgetService: BitgetService,
+    private bybitService: BybitService,
     private configService: ConfigService,
     private pricesService: PricesService,
   ) {
@@ -56,13 +58,8 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
     const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        await this.pricesService.fetchMultipleTickers(this.exchanges, symbols);
-
-        // const balance = await this.bitgetService.fetchBalance(['USDT', 'ETH']);
-        // this.logger.log('__balance: ', balance);
-        // if (fetchTicker) {
-        // this.stopWatching();
-        // }
+        const results = await this.pricesService.fetch_findOp_log_Tickers(this.exchanges, symbols, false);
+        this.logger.log('__justFindOutTickersOptnt: ', results);
 
         // const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS);
         // this.logger.log('__analysis: ', analysis);

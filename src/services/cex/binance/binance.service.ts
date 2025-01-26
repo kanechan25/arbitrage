@@ -1,38 +1,22 @@
 import { depositWallets } from '@/config/wallets';
-import { WithdrawParams } from '@/types/cex.types';
+import { WalletType, WithdrawParams } from '@/types/cex.types';
 import { Injectable } from '@nestjs/common';
 import * as ccxt from 'ccxt';
+import { PricesService } from '@/services/cex/prices.service';
 
 @Injectable()
 export class BinanceService {
   private exchange: ccxt.binance;
 
-  constructor() {
+  constructor(private pricesService: PricesService) {
     this.exchange = new ccxt.binance({
       apiKey: process.env.BINANCE_API_KEY,
       secret: process.env.BINANCE_API_SECRET,
       enableRateLimit: true, // Helps to respect Binance's rate limits
     });
   }
-  async fetchBalance(symbol?: string[]) {
-    try {
-      const balance = await this.exchange.fetchBalance();
-      if (symbol) {
-        return {
-          success: true,
-          data: symbol.map((sym) => balance[sym] || { free: 0, used: 0, total: 0 }),
-        };
-      }
-      return {
-        success: true,
-        data: balance,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
+  async fetchBalance(symbol?: string[], type: WalletType = 'spot') {
+    return await this.pricesService.fetchCexBalance(this.exchange, symbol, type);
   }
   async spotQuoteToBase(symbol: string, quoteAmount: number, watchedBasePrice: number) {
     try {

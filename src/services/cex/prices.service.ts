@@ -2,7 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
 import { LoggerService } from '@/services/_logger.service';
-import { IListenTicker, IMultiTickers, ITicker, ITickerRecords, IExchangeAnalysis } from '@/types/cex.types';
+import {
+  IListenTicker,
+  IMultiTickers,
+  ITicker,
+  ITickerRecords,
+  IExchangeAnalysis,
+  WalletType,
+} from '@/types/cex.types';
 import { analyzeExchangeLog } from '@/services/_exchangeStats';
 @Injectable()
 export class PricesService {
@@ -12,12 +19,25 @@ export class PricesService {
     private configService: ConfigService,
     private logger: LoggerService,
   ) {}
-
-  async fetchMultipleTickers(exchanges: Map<string, ccxt.Exchange>, symbols: string[]): Promise<ITickerRecords[]> {
+  /* params for fetchTickers:
+    limit?: number,        // Maximum number of tickers to return
+    type?: string,        // Market type
+    settle?: string,      // Settlement currency
+    price?: string,       // Price type: 'mark', 'index', 'spot', etc.
+    method?: string,      // HTTP method override
+    timeout?: number,     // Custom timeout in milliseconds
+  */
+  async fetch_findOp_log_Tickers(
+    exchanges: Map<string, ccxt.Exchange>,
+    symbols: string[],
+    isLogger: boolean,
+  ): Promise<IListenTicker[] | null> {
     const tickerPromises = Array.from(exchanges.entries()).map(
       async ([exchangeName, exchange]): Promise<IMultiTickers> => {
         try {
-          const tickers = await exchange.fetchTickers(symbols);
+          const tickers = await exchange.fetchTickers(symbols, {
+            type: 'spot',
+          });
           if (!tickers) {
             this.logger.logWarning(`No valid ticker data on ${exchangeName}`);
             return null;
@@ -44,19 +64,27 @@ export class PricesService {
         last: result.tickers[symbol].last,
       })),
     }));
-
-    if (validResults.length > 0) {
-      validResults.map((validResult) => {
-        Object.values(validResult).map((results) => {
-          this.analyzePrices(results);
-        });
-      });
-    } else {
-      this.logger.logWarning('No valid ticker data received from any exchange');
-    }
-    return validResults;
+    return await this.findOp_log_tickers(validResults, isLogger);
   }
 
+  private async findOp_log_tickers(
+    fetchPriceResults: ITickerRecords[],
+    isLogger: boolean = false,
+  ): Promise<IListenTicker[] | null> {
+    if (fetchPriceResults.length > 0) {
+      const results = fetchPriceResults
+        .map((validResult) => {
+          return Object.values(validResult).map((results) => this.analyzePrices(results, isLogger))[0];
+        })
+        .filter((result): result is IListenTicker => result !== null);
+      return results.length > 0 ? results : null;
+    } else {
+      this.logger.logWarning('No valid ticker data received from any exchange');
+      return null;
+    }
+  }
+
+  // TODO: fetchSingleTicker deprecated 25 Jan 2025
   async fetchSingleTicker(exchanges: Map<string, ccxt.Exchange>, symbol: string): Promise<IListenTicker | null> {
     const tickerPromises = Array.from(exchanges.entries()).map(async ([exchangeName, exchange]): Promise<ITicker> => {
       try {
@@ -89,7 +117,7 @@ export class PricesService {
     }
   }
 
-  private analyzePrices(results: ITicker[]): IListenTicker | null {
+  private analyzePrices(results: ITicker[], isLogger: boolean = false): IListenTicker | null {
     const priceEntries = results
       .filter((result) => result.ticker?.last)
       .map((result) => ({
@@ -97,7 +125,6 @@ export class PricesService {
         symbol: result.ticker.symbol,
         price: result.ticker.last,
       }));
-
     if (priceEntries.length >= 2) {
       const { symbol, minExchange, minPrice, maxExchange, maxPrice } = priceEntries.reduce(
         (acc, entry) => ({
@@ -120,7 +147,6 @@ export class PricesService {
       const diffPercentage = (priceDiff / minPrice) * 100;
 
       this.logger.logInfo(` ${symbol}: Min: ${minPrice} (${minExchange}) | Max: ${maxPrice} (${maxExchange})`);
-      this.logger.logInfo(`Price difference opportunity: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
       const exchangePrices = priceEntries.reduce(
         (acc, entry) => ({
           ...acc,
@@ -128,19 +154,22 @@ export class PricesService {
         }),
         {},
       );
-      this.logger.logPrices({
-        symbol,
-        minPrice,
-        maxPrice,
-        minExchange,
-        maxExchange,
-        priceDiff,
-        diffPercentage: Number(diffPercentage.toFixed(4)),
-        ...exchangePrices,
-      });
-
-      const configUsdtDiff = this.configService.get('usdt_price_diff')[symbol];
-      if (priceDiff > configUsdtDiff) {
+      if (isLogger) {
+        this.logger.logPrices({
+          symbol,
+          minPrice,
+          maxPrice,
+          minExchange,
+          maxExchange,
+          priceDiff,
+          diffPercentage: Number(diffPercentage.toFixed(4)),
+          ...exchangePrices,
+        });
+      }
+      // If the price difference is greater than the configured minimum profit percentage, return the opportunity
+      const configProfitPctDiff = this.configService.get('min_profit_percentage')[symbol];
+      if (diffPercentage > configProfitPctDiff) {
+        this.logger.logInfo(`____FOUND out an opportunity: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
         return {
           symbol,
           minExchange,
@@ -151,9 +180,13 @@ export class PricesService {
           diffPercentage,
           ...exchangePrices,
         };
+      } else {
+        this.logger.logInfo(`_______NO opportunity found: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
+        return null;
       }
+    } else {
+      return null;
     }
-    return null;
   }
   async delay(): Promise<void> {
     const delay_min: number = this.configService.get('fetch_delay_min');
@@ -178,6 +211,32 @@ export class PricesService {
       return { ...analysis, exchanges: {} };
     });
     return Promise.all(analysisPromises);
+  }
+  async fetchCexBalance(exchange: ccxt.Exchange, symbol?: string[], type: WalletType = 'spot') {
+    try {
+      const balance = await exchange.fetchBalance({ type });
+      if (symbol) {
+        return {
+          success: true,
+          data: symbol.map((sym) => ({
+            symbol: sym,
+            type,
+            free: balance[sym]?.free || 0,
+            used: balance[sym]?.used || 0,
+            total: balance[sym]?.total || 0,
+          })),
+        };
+      }
+      return {
+        success: true,
+        data: balance,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
   }
   public getRecentTicks(): ITicker[] {
     return this.recentTicks;
