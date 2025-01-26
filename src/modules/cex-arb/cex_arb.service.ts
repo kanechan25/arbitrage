@@ -61,15 +61,6 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
         // const results = await this.pricesService.fetch_findOp_log_Tickers(this.exchanges, symbols, false);
         // this.logger.log('__justFindOutTickersOptnt: ', results);
 
-        // const binanceBalance = await this.binanceService.fetchBalance(['USDT', 'ETH'], 'spot');
-        // this.logger.log('__binanceBalance: ', binanceBalance);
-
-        const okxBalance = await this.okxService.fetchBalance(['USDT', 'ETH', 'MERL'], 'spot');
-        this.logger.log('__okxBalance: ', okxBalance);
-
-        // const bitgetBalance = await this.bitgetService.fetchBalance(['USDT', 'ETH']);
-        // this.logger.log('__bitgetBalance: ', bitgetBalance);
-
         // const bybitBalance = await this.bybitService.fetchBalance(['USDT', 'ETH']);
         // this.logger.log('__bybitBalance: ', bybitBalance);
 
