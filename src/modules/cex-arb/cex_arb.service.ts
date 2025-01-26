@@ -5,6 +5,7 @@ import { ITicker } from '@/types/cex.types';
 import { PricesService } from '@/services/cex/prices.service';
 import { BinanceService } from '@/services/cex/binance/binance.service';
 import { BitgetService } from '@/services/cex/bitget/bitget.service';
+import { BybitService } from '@/services/cex/bybit/bybit.service';
 import { OkxService } from '@/services/cex/okx/okx.service';
 // import { LOG_PATHS } from '@/constants';
 
@@ -19,6 +20,7 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
     private binanceService: BinanceService,
     private okxService: OkxService,
     private bitgetService: BitgetService,
+    private bybitService: BybitService,
     private configService: ConfigService,
     private pricesService: PricesService,
   ) {
@@ -53,17 +55,29 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
     // const symbol: string = this.configService.get('symbol');
     // const [base, quote] = symbol.split('/');
 
-    const symbols: string[] = this.configService.get('symbols');
+    // const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        const results = await this.pricesService.fetch_findOp_log_Tickers(this.exchanges, symbols, false);
-        this.logger.log('__justFindOutTickersOptnt: ', results);
+        // const results = await this.pricesService.fetch_findOp_log_Tickers(this.exchanges, symbols, false);
+        // this.logger.log('__justFindOutTickersOptnt: ', results);
+
+        const binanceBalance = await this.binanceService.fetchBalance(['USDT', 'ETH'], 'spot');
+        this.logger.log('__binanceBalance: ', binanceBalance);
+
+        // const okxBalance = await this.okxService.fetchBalance(['USDT', 'ETH']);
+        // this.logger.log('__okxBalance: ', okxBalance);
+
+        // const bitgetBalance = await this.bitgetService.fetchBalance(['USDT', 'ETH']);
+        // this.logger.log('__bitgetBalance: ', bitgetBalance);
+
+        // const bybitBalance = await this.bybitService.fetchBalance(['USDT', 'ETH']);
+        // this.logger.log('__bybitBalance: ', bybitBalance);
 
         // const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS);
         // this.logger.log('__analysis: ', analysis);
 
-        // this.stopWatching();
-        await this.pricesService.delay();
+        this.stopWatching();
+        // await this.pricesService.delay();
       }
     } catch (error) {
       this.logger.error('Error in price watching loop:', error);

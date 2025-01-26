@@ -1,5 +1,6 @@
 import * as ccxt from 'ccxt';
 
+export type WalletType = 'spot' | 'funding';
 export interface ITicker {
   exchange: string;
   ticker: ccxt.Ticker;

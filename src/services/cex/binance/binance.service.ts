@@ -1,5 +1,5 @@
 import { depositWallets } from '@/config/wallets';
-import { WithdrawParams } from '@/types/cex.types';
+import { WalletType, WithdrawParams } from '@/types/cex.types';
 import { Injectable } from '@nestjs/common';
 import * as ccxt from 'ccxt';
 
@@ -14,13 +14,19 @@ export class BinanceService {
       enableRateLimit: true, // Helps to respect Binance's rate limits
     });
   }
-  async fetchBalance(symbol?: string[]) {
+  async fetchBalance(symbol?: string[], type: WalletType = 'spot') {
     try {
-      const balance = await this.exchange.fetchBalance();
+      const balance = await this.exchange.fetchBalance({ type });
       if (symbol) {
         return {
           success: true,
-          data: symbol.map((sym) => balance[sym] || { free: 0, used: 0, total: 0 }),
+          data: symbol.map((sym) => ({
+            symbol: sym,
+            type,
+            free: balance[sym]?.free || 0,
+            used: balance[sym]?.used || 0,
+            total: balance[sym]?.total || 0,
+          })),
         };
       }
       return {
