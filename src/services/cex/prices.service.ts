@@ -12,7 +12,14 @@ export class PricesService {
     private configService: ConfigService,
     private logger: LoggerService,
   ) {}
-
+  /* params for fetchTickers:
+    limit?: number,        // Maximum number of tickers to return
+    type?: string,        // Market type
+    settle?: string,      // Settlement currency
+    price?: string,       // Price type: 'mark', 'index', 'spot', etc.
+    method?: string,      // HTTP method override
+    timeout?: number,     // Custom timeout in milliseconds
+  */
   async fetch_findOp_log_Tickers(
     exchanges: Map<string, ccxt.Exchange>,
     symbols: string[],
@@ -21,7 +28,9 @@ export class PricesService {
     const tickerPromises = Array.from(exchanges.entries()).map(
       async ([exchangeName, exchange]): Promise<IMultiTickers> => {
         try {
-          const tickers = await exchange.fetchTickers(symbols);
+          const tickers = await exchange.fetchTickers(symbols, {
+            type: 'spot',
+          });
           if (!tickers) {
             this.logger.logWarning(`No valid ticker data on ${exchangeName}`);
             return null;
@@ -48,10 +57,10 @@ export class PricesService {
         last: result.tickers[symbol].last,
       })),
     }));
-    return await this.find_log_tickersOptnt(validResults, isLogger);
+    return await this.findOp_log_tickers(validResults, isLogger);
   }
 
-  async find_log_tickersOptnt(
+  private async findOp_log_tickers(
     fetchPriceResults: ITickerRecords[],
     isLogger: boolean = false,
   ): Promise<IListenTicker[] | null> {
@@ -131,7 +140,6 @@ export class PricesService {
       const diffPercentage = (priceDiff / minPrice) * 100;
 
       this.logger.logInfo(` ${symbol}: Min: ${minPrice} (${minExchange}) | Max: ${maxPrice} (${maxExchange})`);
-      this.logger.logInfo(`Price difference opportunity: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
       const exchangePrices = priceEntries.reduce(
         (acc, entry) => ({
           ...acc,
@@ -154,7 +162,7 @@ export class PricesService {
       // If the price difference is greater than the configured minimum profit percentage, return the opportunity
       const configProfitPctDiff = this.configService.get('min_profit_percentage')[symbol];
       if (diffPercentage > configProfitPctDiff) {
-        this.logger.logInfo(`____Found out an opportunity: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
+        this.logger.logInfo(`____FOUND out an opportunity: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
         return {
           symbol,
           minExchange,
@@ -166,7 +174,7 @@ export class PricesService {
           ...exchangePrices,
         };
       } else {
-        this.logger.logInfo(`____No opportunity found: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
+        this.logger.logInfo(`_______NO opportunity found: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
         return null;
       }
     } else {
