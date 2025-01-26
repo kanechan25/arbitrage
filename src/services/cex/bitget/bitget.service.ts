@@ -3,12 +3,13 @@
 import { WalletType } from '@/types/cex.types';
 import { Injectable } from '@nestjs/common';
 import * as ccxt from 'ccxt';
+import { PricesService } from '@/services/cex/prices.service';
 
 @Injectable()
 export class BitgetService {
   private exchange: ccxt.bitget;
 
-  constructor() {
+  constructor(private pricesService: PricesService) {
     this.exchange = new ccxt.bitget({
       apiKey: process.env.BITGET_API_KEY,
       secret: process.env.BITGET_API_SECRET,
@@ -18,31 +19,7 @@ export class BitgetService {
   }
 
   async fetchBalance(symbol?: string[], type: WalletType = 'spot') {
-    try {
-      const balance = await this.exchange.fetchBalance({ type });
-      if (symbol) {
-        return {
-          success: true,
-          data: symbol.map((sym) => ({
-            symbol: sym,
-            type,
-            free: balance[sym]?.free || 0,
-            used: balance[sym]?.used || 0,
-            total: balance[sym]?.total || 0,
-          })),
-        };
-      }
-      return {
-        success: true,
-        data: balance,
-      };
-    } catch (error) {
-      console.log('__error: ', error);
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
+    return await this.pricesService.fetchCexBalance(this.exchange, symbol, type);
   }
 
   // async spotQuoteToBase(symbol: string, quoteAmount: number, watchedBasePrice: number) {
