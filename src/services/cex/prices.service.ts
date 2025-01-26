@@ -169,7 +169,7 @@ export class PricesService {
       // If the price difference is greater than the configured minimum profit percentage, return the opportunity
       const configProfitPctDiff = this.configService.get('min_profit_percentage')[symbol];
       if (diffPercentage > configProfitPctDiff) {
-        this.logger.logInfo(`____FOUND out an opportunity: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
+        // this.logger.logInfo(`____FOUND out an opportunity: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
         return {
           symbol,
           minExchange,
@@ -181,7 +181,7 @@ export class PricesService {
           ...exchangePrices,
         };
       } else {
-        this.logger.logInfo(`_______NO opportunity found: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
+        // this.logger.logInfo(`_______NO opportunity found: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
         return null;
       }
     } else {

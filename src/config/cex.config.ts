@@ -58,6 +58,6 @@ export default () => ({
   min_usdt_price_diff: {
     'SOL/USDT': 0.05,
   },
-  fetch_delay_min: 3000,
-  fetch_delay_max: 5400,
+  fetch_delay_min: 1000,
+  fetch_delay_max: 1400,
 });

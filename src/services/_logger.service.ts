@@ -46,7 +46,7 @@ export class LoggerService {
         format: combine(timestamp(), json()),
         transports: [
           new winston.transports.File({
-            filename: `logs/prices_${symbol}_${timeNow}.log`,
+            filename: `logs/_${timeNow}_prices_${symbol}.log`,
           }),
         ],
       });
