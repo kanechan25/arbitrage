@@ -62,13 +62,15 @@ export const CEX = Object.freeze({
 });
 
 export const CHAINS = Object.freeze({
-  BSC: 'BEP20',
-  ARB: 'ARBITRUM',
-  TRON: 'TRC20',
-  OPTIMISM: 'OPTIMISM',
-  BASE: 'BASE',
   APTOS: 'APTOS',
+  ARB: 'ARBITRUM',
+  AVAX: 'AVAX',
+  BASE: 'BASE',
+  BSC: 'BEP20',
+  OPTIMISM: 'OPTIMISM',
+  SOL: 'SOL',
   TON: 'TON',
+  TRON: 'TRC20',
 });
 
 export interface WithdrawParams {

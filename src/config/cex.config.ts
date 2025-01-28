@@ -5,9 +5,9 @@ export default () => ({
     'ADA/USDT': 0.21,
     'SOL/USDT': 0.21,
     'TRUMP/USDT': 0.21,
-    'DOGE/USDT': 0.01,
-    'SUI/USDT': 0.01,
-    'XRP/USDT': 0.01,
+    'DOGE/USDT': 0.21,
+    'SUI/USDT': 0.21,
+    'XRP/USDT': 0.21,
   },
   exchanges: [
     {
