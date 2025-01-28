@@ -1,6 +1,6 @@
 export default () => ({
   symbol: 'ETH/USDT',
-  symbols: ['TRUMP/USDT', 'DOGE/USDT', 'SUI/USDT', 'XRP/USDT'],
+  symbols: ['TRUMP/USDT', 'DOGE/USDT', 'XRP/USDT'],
   min_profit_percentage: {
     'TRUMP/USDT': 0.01,
     'DOGE/USDT': 0.01,
@@ -23,11 +23,11 @@ export default () => ({
       apiKey: process.env.MEXC_API_KEY,
       apiSecret: process.env.MEXC_API_SECRET,
     },
-    {
-      name: 'kucoin',
-      apiKey: process.env.KUCOIN_API_KEY,
-      apiSecret: process.env.KUCOIN_API_SECRET,
-    },
+    // {
+    //   name: 'kucoin',
+    //   apiKey: process.env.KUCOIN_API_KEY,
+    //   apiSecret: process.env.KUCOIN_API_SECRET,
+    // },
     {
       name: 'bitget',
       apiKey: process.env.BITGET_API_KEY,
