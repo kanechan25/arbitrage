@@ -67,6 +67,8 @@ export const CHAINS = Object.freeze({
   TRON: 'TRC20',
   OPTIMISM: 'OPTIMISM',
   BASE: 'BASE',
+  APTOS: 'APTOS',
+  TON: 'TON',
 });
 
 export interface WithdrawParams {

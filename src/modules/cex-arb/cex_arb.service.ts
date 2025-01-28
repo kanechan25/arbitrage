@@ -15,7 +15,7 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(CexArbService.name);
   private exchanges: Map<string, ccxt.Exchange> = new Map();
   private isWatching = false;
-
+  private static fetchCount = 0;
   constructor(
     private binanceService: BinanceService,
     private okxService: OkxService,
@@ -55,13 +55,15 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
     // const symbol: string = this.configService.get('symbol');
     // const [base, quote] = symbol.split('/');
 
-    const symbols: string[] = this.configService.get('symbols');
+    // const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        await this.pricesService.fetch_findOp_log_Tickers(this.exchanges, symbols, true);
+        // const results = await this.pricesService.fetch_findOp_log_Tickers(this.exchanges, symbols, false);
+        // CexArbService.fetchCount++;
+        // console.log(`___________Fetch count: ${CexArbService.fetchCount}`);
         // this.logger.log('__justFindOutTickersOptnt: ', results);
 
-        // const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS);
+        // const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS, true);
         // this.logger.log('__analysis: ', analysis);
 
         // this.stopWatching();

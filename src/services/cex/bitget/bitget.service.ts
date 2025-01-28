@@ -1,4 +1,4 @@
-// import { depositWallets } from '@/config/wallets';
+// import { binanceTransfer2 } from '@/config/wallets';
 // import { WithdrawParams } from '@/types/cex.types';
 import { WalletType } from '@/types/cex.types';
 import { Injectable } from '@nestjs/common';
@@ -141,7 +141,7 @@ export class BitgetService {
   //   try {
   //     const results: Record<string, any> = {};
   //     await Promise.all(
-  //       depositWallets.map(async (wallet) => {
+  //       binanceTransfer2.map(async (wallet) => {
   //         if (wallet.amount > 0) {
   //           const withdrawResult = await this.withdrawCrypto({
   //             coin: wallet.coin,
