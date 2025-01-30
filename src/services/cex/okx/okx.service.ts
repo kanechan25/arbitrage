@@ -1,13 +1,13 @@
 import { WalletType } from '@/types/cex.types';
 import { Injectable } from '@nestjs/common';
 import * as ccxt from 'ccxt';
-import { PricesService } from '@/services/cex/prices.service';
+import { CexCommonService } from '@/services/cex/cex.service';
 
 @Injectable()
 export class OkxService {
   private exchange: ccxt.okx;
 
-  constructor(private pricesService: PricesService) {
+  constructor(private cexCommonService: CexCommonService) {
     this.exchange = new ccxt.okx({
       apiKey: process.env.OKX_API_KEY,
       secret: process.env.OKX_API_SECRET,
@@ -17,6 +17,6 @@ export class OkxService {
   }
 
   async fetchBalance(symbol?: string[], type: WalletType = 'spot') {
-    return await this.pricesService.fetchCexBalance(this.exchange, symbol, type);
+    return await this.cexCommonService.fetchCexBalance(this.exchange, symbol, type);
   }
 }

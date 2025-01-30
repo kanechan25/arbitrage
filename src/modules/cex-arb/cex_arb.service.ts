@@ -55,19 +55,22 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
     // const symbol: string = this.configService.get('symbol');
     // const [base, quote] = symbol.split('/');
 
-    const symbols: string[] = this.configService.get('symbols');
+    // const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        await this.pricesService.fetch_findOp_log_Tickers(this.exchanges, symbols, true);
-        CexArbService.fetchCount++;
-        console.log(`___________Fetch count: ${CexArbService.fetchCount}`);
+        // await this.pricesService.fetch_findOp_log_Tickers(this.exchanges, symbols, true);
+        // CexArbService.fetchCount++;
+        // console.log(`___________Fetch count: ${CexArbService.fetchCount}`);
         // this.logger.log('__justFindOutTickersOptnt: ', results);
 
         // const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS, true);
         // this.logger.log('__analysis: ', analysis);
 
-        // this.stopWatching();
-        await this.pricesService.delay();
+        const balance = await this.bybitService.fetchBalance(['USDT', 'ETH', 'DOGE', 'MERL'], 'spot');
+        this.logger.log('__balance: ', balance);
+
+        this.stopWatching();
+        // await this.pricesService.delay();
       }
     } catch (error) {
       this.logger.error('Error in price watching loop:', error);

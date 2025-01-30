@@ -2,14 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
 import { LoggerService } from '@/services/_logger.service';
-import {
-  IListenTicker,
-  IMultiTickers,
-  ITicker,
-  ITickerRecords,
-  IExchangeAnalysis,
-  WalletType,
-} from '@/types/cex.types';
+import { IListenTicker, IMultiTickers, ITicker, ITickerRecords, IExchangeAnalysis } from '@/types/cex.types';
 import { analyzeExchangeLog } from '@/services/_exchangeStats';
 @Injectable()
 export class PricesService {
@@ -84,38 +77,7 @@ export class PricesService {
     }
   }
 
-  // TODO: fetchSingleTicker deprecated 25 Jan 2025
-  async fetchSingleTicker(exchanges: Map<string, ccxt.Exchange>, symbol: string): Promise<IListenTicker | null> {
-    const tickerPromises = Array.from(exchanges.entries()).map(async ([exchangeName, exchange]): Promise<ITicker> => {
-      try {
-        const ticker = await exchange.fetchTicker(symbol);
-        if (!ticker || !ticker.last) {
-          this.logger.logWarning(`No valid ticker data for ${symbol} on ${exchangeName}`);
-          return null;
-        }
-        const tickData: ITicker = {
-          exchange: exchangeName,
-          ticker: ticker,
-          timestamp: ticker.timestamp,
-          last: ticker.last,
-        };
-        return tickData;
-      } catch (error) {
-        this.logger.logError(error, `Error fetching ${symbol} ticker from ${exchangeName}: ${error.message}`);
-        return null;
-      }
-    });
-
-    const results = await Promise.all(tickerPromises);
-    const validResults = results.filter((result): result is ITicker => result !== null);
-    // this.logger.log('validResults: ', validResults);
-    if (validResults.length > 0) {
-      return this.analyzePrices(validResults);
-    } else {
-      this.logger.logWarning('No valid ticker data received from any exchange');
-      return null;
-    }
-  }
+  // fetchSingleTicker deprecated 25 Jan 2025, deleted 30 Jan 2025
 
   private analyzePrices(results: ITicker[], isLogger: boolean = false): IListenTicker | null {
     const priceEntries = results
@@ -212,32 +174,7 @@ export class PricesService {
     });
     return Promise.all(analysisPromises);
   }
-  async fetchCexBalance(exchange: ccxt.Exchange, symbol?: string[], type: WalletType = 'spot') {
-    try {
-      const balance = await exchange.fetchBalance({ type });
-      if (symbol) {
-        return {
-          success: true,
-          data: symbol.map((sym) => ({
-            symbol: sym,
-            type,
-            free: balance[sym]?.free || 0,
-            used: balance[sym]?.used || 0,
-            total: balance[sym]?.total || 0,
-          })),
-        };
-      }
-      return {
-        success: true,
-        data: balance,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
-  }
+
   public getRecentTicks(): ITicker[] {
     return this.recentTicks;
   }

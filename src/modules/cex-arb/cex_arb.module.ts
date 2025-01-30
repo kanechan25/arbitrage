@@ -8,11 +8,21 @@ import { OkxService } from '@/services/cex/okx/okx.service';
 import { BitgetService } from '@/services/cex/bitget/bitget.service';
 import { LoggerService } from '@/services/_logger.service';
 import { BybitService } from '@/services/cex/bybit/bybit.service';
+import { CexCommonService } from '@/services/cex/cex.service';
 
 @Module({
   imports: [ConfigModule],
   controllers: [CexArbController],
-  providers: [CexArbService, PricesService, BinanceService, OkxService, BitgetService, BybitService, LoggerService],
+  providers: [
+    CexArbService,
+    CexCommonService,
+    PricesService,
+    BinanceService,
+    OkxService,
+    BitgetService,
+    BybitService,
+    LoggerService,
+  ],
   exports: [CexArbService],
 })
 export class CexArbModule {}
