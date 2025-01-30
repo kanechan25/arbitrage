@@ -55,12 +55,12 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
     // const symbol: string = this.configService.get('symbol');
     // const [base, quote] = symbol.split('/');
 
-    // const symbols: string[] = this.configService.get('symbols');
+    const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        // const results = await this.pricesService.fetch_findOp_log_Tickers(this.exchanges, symbols, false);
-        // CexArbService.fetchCount++;
-        // console.log(`___________Fetch count: ${CexArbService.fetchCount}`);
+        await this.pricesService.fetch_findOp_log_Tickers(this.exchanges, symbols, true);
+        CexArbService.fetchCount++;
+        console.log(`___________Fetch count: ${CexArbService.fetchCount}`);
         // this.logger.log('__justFindOutTickersOptnt: ', results);
 
         // const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS, true);
