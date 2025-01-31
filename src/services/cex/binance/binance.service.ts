@@ -1,14 +1,13 @@
 import { binanceTransfer2 } from '@/config/wallets';
-import { WalletType, WithdrawParams } from '@/types/cex.types';
+import { ICurrencyInterface, WalletType, WithdrawParams } from '@/types/cex.types';
 import { Injectable } from '@nestjs/common';
 import * as ccxt from 'ccxt';
-import { PricesService } from '@/services/cex/prices.service';
-
+import { CexCommonService } from '@/services/cex/cex.service';
 @Injectable()
 export class BinanceService {
   private exchange: ccxt.binance;
 
-  constructor(private pricesService: PricesService) {
+  constructor(private cexCommonService: CexCommonService) {
     this.exchange = new ccxt.binance({
       apiKey: process.env.BINANCE_API_KEY,
       secret: process.env.BINANCE_API_SECRET,
@@ -16,7 +15,7 @@ export class BinanceService {
     });
   }
   async fetchBalance(symbol?: string[], type: WalletType = 'spot') {
-    return await this.pricesService.fetchCexBalance(this.exchange, symbol, type);
+    return await this.cexCommonService.fetchCexBalance(this.exchange, symbol, type);
   }
   async spotQuoteToBase(symbol: string, quoteAmount: number, watchedBasePrice: number) {
     try {
@@ -51,6 +50,38 @@ export class BinanceService {
       return {
         success: false,
         error: errorMessage,
+      };
+    }
+  }
+
+  async deposit2Wallets() {
+    try {
+      const results: Record<string, any> = {};
+      await Promise.all(
+        binanceTransfer2.map(async (wallet) => {
+          if (wallet.amount > 0) {
+            const withdrawResult = await this.withdrawCrypto({
+              coin: wallet.coin,
+              amount: wallet.amount,
+              address: wallet.address,
+              network: wallet.network,
+            });
+            results[wallet.platform] = withdrawResult;
+          } else {
+            results[wallet.platform] = {};
+          }
+        }),
+      );
+      return {
+        success: true,
+        error: null,
+        data: results,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+        data: {},
       };
     }
   }
@@ -107,10 +138,11 @@ export class BinanceService {
       };
     }
   }
+  // get withdrawal info of a coin in that cex (withdrawal fees, minDeposit, maxDeposit, etc)
   async getWithdrawalInfo(coin: string) {
     try {
       const currencies = await this.exchange.fetchCurrencies();
-      const coinInfo = currencies[coin];
+      const coinInfo = currencies[coin] as ICurrencyInterface;
 
       if (!coinInfo) {
         throw new Error(`Coin ${coin} not found`);
@@ -120,47 +152,18 @@ export class BinanceService {
         success: true,
         data: {
           coin,
-          networks: coinInfo.networks,
           active: coinInfo.active,
           withdrawEnabled: coinInfo.withdraw,
           depositEnabled: coinInfo.deposit,
+          withdrawalFees: coinInfo.fees,
+          // networks: coinInfo.networks,
+          // coinInfo,
         },
       };
     } catch (error) {
       return {
         success: false,
         error: error.message,
-      };
-    }
-  }
-  async deposit2Wallets() {
-    try {
-      const results: Record<string, any> = {};
-      await Promise.all(
-        binanceTransfer2.map(async (wallet) => {
-          if (wallet.amount > 0) {
-            const withdrawResult = await this.withdrawCrypto({
-              coin: wallet.coin,
-              amount: wallet.amount,
-              address: wallet.address,
-              network: wallet.network,
-            });
-            results[wallet.platform] = withdrawResult;
-          } else {
-            results[wallet.platform] = {};
-          }
-        }),
-      );
-      return {
-        success: true,
-        error: null,
-        data: results,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-        data: {},
       };
     }
   }

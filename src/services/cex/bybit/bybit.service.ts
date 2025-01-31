@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { WalletType } from '@/types/cex.types';
 import * as ccxt from 'ccxt';
-import { PricesService } from '@/services/cex/prices.service';
+import { CexCommonService } from '@/services/cex/cex.service';
 
 @Injectable()
 export class BybitService {
   private exchange: ccxt.bybit;
 
-  constructor(private pricesService: PricesService) {
+  constructor(private cexCommonService: CexCommonService) {
     this.exchange = new ccxt.bybit({
       apiKey: process.env.BYBIT_API_KEY,
       secret: process.env.BYBIT_API_SECRET,
@@ -16,6 +16,6 @@ export class BybitService {
 
   async fetchBalance(symbol?: string[], type: WalletType = 'spot') {
     // spot of bybit is Unified Trading
-    return await this.pricesService.fetchCexBalance(this.exchange, symbol, type);
+    return await this.cexCommonService.fetchCexBalance(this.exchange, symbol, type);
   }
 }

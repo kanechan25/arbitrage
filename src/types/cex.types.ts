@@ -81,3 +81,9 @@ export interface WithdrawParams {
   memo?: string; // Required for some coins like XRP
   tag?: string; // Required for some coins
 }
+
+export interface ICurrencyInterface extends ccxt.CurrencyInterface {
+  fees: {
+    [key: string]: number;
+  };
+}

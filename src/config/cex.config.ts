@@ -30,11 +30,6 @@ export default () => ({
       apiKey: process.env.MEXC_API_KEY,
       apiSecret: process.env.MEXC_API_SECRET,
     },
-    // {
-    //   name: 'kucoin',
-    //   apiKey: process.env.KUCOIN_API_KEY,
-    //   apiSecret: process.env.KUCOIN_API_SECRET,
-    // },
     {
       name: 'bitget',
       apiKey: process.env.BITGET_API_KEY,
@@ -50,16 +45,6 @@ export default () => ({
       apiKey: process.env.HUOBI_API_KEY,
       apiSecret: process.env.HUOBI_API_SECRET,
     },
-    // {
-    //   name: 'gateio',
-    //   apiKey: process.env.GATEIO_API_KEY,
-    //   apiSecret: process.env.GATEIO_API_SECRET,
-    // },
-    // {
-    //   name: 'lbank',
-    //   apiKey: process.env.LBANK_API_KEY,
-    //   apiSecret: process.env.LBANK_API_SECRET,
-    // },
   ],
   usdt_amount: 100,
   min_usdt_price_diff: {
