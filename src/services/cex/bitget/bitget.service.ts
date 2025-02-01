@@ -18,4 +18,8 @@ export class BitgetService {
   async fetchBalance(symbol?: string[], type: WalletType = 'spot') {
     return await this.cexCommonService.fetchCexBalance(this.exchange, symbol, type);
   }
+
+  async fetchWithdrawalInfo(coin: string) {
+    return await this.cexCommonService.getInfoWithdrawalTokens(this.exchange, coin);
+  }
 }

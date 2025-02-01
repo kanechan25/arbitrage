@@ -18,4 +18,8 @@ export class BybitService {
     // spot of bybit is Unified Trading
     return await this.cexCommonService.fetchCexBalance(this.exchange, symbol, type);
   }
+
+  async fetchWithdrawalInfo(coin: string) {
+    return await this.cexCommonService.getInfoWithdrawalTokens(this.exchange, coin);
+  }
 }
