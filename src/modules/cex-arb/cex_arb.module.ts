@@ -8,7 +8,7 @@ import { OkxService } from '@/services/cex/okx/okx.service';
 import { BitgetService } from '@/services/cex/bitget/bitget.service';
 import { LoggerService } from '@/services/_logger.service';
 import { BybitService } from '@/services/cex/bybit/bybit.service';
-import { CexCommonService } from '@/services/cex/cex.service';
+import { CexCommonService } from '@/services/cex/cex.common.service';
 
 @Module({
   imports: [ConfigModule],

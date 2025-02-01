@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { BitgetService } from './bitget.service';
 import { BitgetController } from './bitget.controller';
 import { PricesService } from '../prices.service';
-import { CexCommonService } from '../cex.service';
+import { CexCommonService } from '../cex.common.service';
 
 @Module({
   imports: [ConfigModule],

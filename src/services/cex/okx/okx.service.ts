@@ -1,7 +1,7 @@
 import { WalletType } from '@/types/cex.types';
 import { Injectable } from '@nestjs/common';
 import * as ccxt from 'ccxt';
-import { CexCommonService } from '@/services/cex/cex.service';
+import { CexCommonService } from '@/services/cex/cex.common.service';
 
 @Injectable()
 export class OkxService {

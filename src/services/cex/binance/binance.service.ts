@@ -1,8 +1,8 @@
 import { binanceTransfer2 } from '@/config/wallets';
-import { WalletType, WithdrawParams } from '@/types/cex.types';
+import { WalletType } from '@/types/cex.types';
 import { Injectable } from '@nestjs/common';
 import * as ccxt from 'ccxt';
-import { CexCommonService } from '@/services/cex/cex.service';
+import { CexCommonService } from '@/services/cex/cex.common.service';
 @Injectable()
 export class BinanceService {
   private exchange: ccxt.binance;
@@ -60,7 +60,7 @@ export class BinanceService {
       await Promise.all(
         binanceTransfer2.map(async (wallet) => {
           if (wallet.amount > 0) {
-            const withdrawResult = await this.withdrawCrypto({
+            const withdrawResult = await this.cexCommonService.withdrawCrypto(this.exchange, {
               coin: wallet.coin,
               amount: wallet.amount,
               address: wallet.address,
@@ -86,58 +86,6 @@ export class BinanceService {
     }
   }
 
-  async withdrawCrypto(params: WithdrawParams) {
-    try {
-      // First verify if withdrawal is possible
-      const withdrawInfo = await this.exchange.fetchCurrencies();
-      const coinInfo = withdrawInfo[params.coin];
-
-      if (!coinInfo || !coinInfo.active || !coinInfo.withdraw) {
-        throw new Error(`Withdrawals for ${params.coin} are currently disabled`);
-      }
-
-      const networks = coinInfo.networks;
-      let selectedNetwork = null;
-
-      if (params.network) {
-        selectedNetwork = networks[params.network];
-        if (!selectedNetwork) {
-          throw new Error(`Network ${params.network} not found for ${params.coin}`);
-        }
-      } else {
-        selectedNetwork = Object.values(networks)[0];
-      }
-
-      // Check minimum withdrawal
-      if (params.amount < selectedNetwork.withdrawMin) {
-        throw new Error(
-          `Amount ${params.amount} is below minimum withdrawal of ${selectedNetwork.withdrawMin} ${params.coin}`,
-        );
-      }
-
-      const withdrawal = await this.exchange.withdraw(params.coin, params.amount, params.address, params.tag, {
-        network: params.network,
-        memo: params.memo,
-      });
-
-      return {
-        success: true,
-        data: {
-          id: withdrawal.id,
-          txid: withdrawal.txid,
-          amount: withdrawal.amount,
-          fee: withdrawal.fee,
-          network: params.network,
-          status: withdrawal.status,
-        },
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
-  }
   // get withdrawal info of a coin in that cex (withdrawal fees, minDeposit, maxDeposit, etc)
   async fetchWithdrawalInfo(coin: string) {
     return await this.cexCommonService.getInfoWithdrawalTokens(this.exchange, coin);

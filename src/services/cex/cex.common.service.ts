@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PricesService } from './prices.service';
 import * as ccxt from 'ccxt';
-import { ICurrencyInterface, WalletType } from '@/types/cex.types';
+import { ICurrencyInterface, WalletType, WithdrawParams } from '@/types/cex.types';
 @Injectable()
 export class CexCommonService {
   private readonly log = new Logger(CexCommonService.name);
@@ -59,6 +59,59 @@ export class CexCommonService {
           withdrawalFees: coinInfo.fees,
           networks: coinInfo.networks,
           // coinInfo,
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  async withdrawCrypto(exchange: ccxt.Exchange, params: WithdrawParams) {
+    try {
+      // First verify if withdrawal is possible
+      const withdrawInfo = await exchange.fetchCurrencies();
+      const coinInfo = withdrawInfo[params.coin];
+
+      if (!coinInfo || !coinInfo.active || !coinInfo.withdraw) {
+        throw new Error(`Withdrawals for ${params.coin} are currently disabled`);
+      }
+
+      const networks = coinInfo.networks;
+      let selectedNetwork = null;
+
+      if (params.network) {
+        selectedNetwork = networks[params.network];
+        if (!selectedNetwork) {
+          throw new Error(`Network ${params.network} not found for ${params.coin}`);
+        }
+      } else {
+        selectedNetwork = Object.values(networks)[0];
+      }
+
+      // Check minimum withdrawal
+      if (params.amount < selectedNetwork.withdrawMin) {
+        throw new Error(
+          `Amount ${params.amount} is below minimum withdrawal of ${selectedNetwork.withdrawMin} ${params.coin}`,
+        );
+      }
+
+      const withdrawal = await exchange.withdraw(params.coin, params.amount, params.address, params.tag, {
+        network: params.network,
+        memo: params.memo,
+      });
+
+      return {
+        success: true,
+        data: {
+          id: withdrawal.id,
+          txid: withdrawal.txid,
+          amount: withdrawal.amount,
+          fee: withdrawal.fee,
+          network: params.network,
+          status: withdrawal.status,
         },
       };
     } catch (error) {
