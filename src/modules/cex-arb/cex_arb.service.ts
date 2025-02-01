@@ -62,13 +62,10 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
         // CexArbService.fetchCount++;
         // console.log(`___________Fetch count: ${CexArbService.fetchCount}`);
         // this.logger.log('__justFindOutTickersOptnt: ', results);
-
-        // const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS, true);
+        // const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS, false);
         // this.logger.log('__analysis: ', analysis);
-
-        const result = await this.binanceService.getWithdrawalInfo('TRUMP');
+        const result = await this.binanceService.fetchWithdrawalInfo('TRUMP');
         this.logger.log('__result: ', result);
-
         this.stopWatching();
         // await this.pricesService.delay();
       }

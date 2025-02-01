@@ -19,4 +19,8 @@ export class OkxService {
   async fetchBalance(symbol?: string[], type: WalletType = 'spot') {
     return await this.cexCommonService.fetchCexBalance(this.exchange, symbol, type);
   }
+  // get withdrawal info of a coin in that cex (withdrawal fees, minDeposit, maxDeposit, etc)
+  async fetchWithdrawalInfo(coin: string) {
+    return await this.cexCommonService.getInfoWithdrawalTokens(this.exchange, coin);
+  }
 }

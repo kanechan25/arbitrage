@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PricesService } from './prices.service';
 import * as ccxt from 'ccxt';
-import { WalletType } from '@/types/cex.types';
+import { ICurrencyInterface, WalletType } from '@/types/cex.types';
 @Injectable()
 export class CexCommonService {
   private readonly log = new Logger(CexCommonService.name);
@@ -30,6 +30,36 @@ export class CexCommonService {
       return {
         success: true,
         data: balance,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  // get withdrawal info of a coin in that cex (withdrawal fees, minDeposit, maxDeposit, etc)
+  async getInfoWithdrawalTokens(exchange: ccxt.Exchange, coin: string) {
+    try {
+      const currencies = await exchange.fetchCurrencies();
+      const coinInfo = currencies[coin] as ICurrencyInterface;
+
+      if (!coinInfo) {
+        throw new Error(`Coin ${coin} not found`);
+      }
+
+      return {
+        success: true,
+        data: {
+          coin,
+          active: coinInfo.active,
+          withdrawEnabled: coinInfo.withdraw,
+          depositEnabled: coinInfo.deposit,
+          withdrawalFees: coinInfo.fees,
+          networks: coinInfo.networks,
+          // coinInfo,
+        },
       };
     } catch (error) {
       return {

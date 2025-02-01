@@ -1,5 +1,5 @@
 import { binanceTransfer2 } from '@/config/wallets';
-import { ICurrencyInterface, WalletType, WithdrawParams } from '@/types/cex.types';
+import { WalletType, WithdrawParams } from '@/types/cex.types';
 import { Injectable } from '@nestjs/common';
 import * as ccxt from 'ccxt';
 import { CexCommonService } from '@/services/cex/cex.service';
@@ -139,32 +139,7 @@ export class BinanceService {
     }
   }
   // get withdrawal info of a coin in that cex (withdrawal fees, minDeposit, maxDeposit, etc)
-  async getWithdrawalInfo(coin: string) {
-    try {
-      const currencies = await this.exchange.fetchCurrencies();
-      const coinInfo = currencies[coin] as ICurrencyInterface;
-
-      if (!coinInfo) {
-        throw new Error(`Coin ${coin} not found`);
-      }
-
-      return {
-        success: true,
-        data: {
-          coin,
-          active: coinInfo.active,
-          withdrawEnabled: coinInfo.withdraw,
-          depositEnabled: coinInfo.deposit,
-          withdrawalFees: coinInfo.fees,
-          // networks: coinInfo.networks,
-          // coinInfo,
-        },
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
+  async fetchWithdrawalInfo(coin: string) {
+    return await this.cexCommonService.getInfoWithdrawalTokens(this.exchange, coin);
   }
 }
