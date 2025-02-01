@@ -84,14 +84,14 @@ export const WALLETS = Object.freeze({
   },
 });
 
-// Withdraw min 10 USDT Binance: BSC -> OPTIMISM -> APTOS -> MATIC -> ARB
+// Withdraw min 10 USDT Binance: BSC -> CELO -> OPTIMISM, AVAX, APTOS -> MATIC -> ARB
 export const binanceTransfer2 = [
   {
     platform: CEX.OKX,
     coin: 'USDT',
     amount: 0,
-    address: WALLETS[CEX.OKX].USDT[CHAINS.OPTIMISM],
-    network: CHAINS.OPTIMISM,
+    address: WALLETS[CEX.OKX].USDT[CHAINS.APTOS],
+    network: CHAINS.APTOS,
   },
   {
     platform: CEX.MEXC,
@@ -227,7 +227,7 @@ export const bitgetTransfer2 = [
   {
     platform: CEX.HUOBI,
     coin: 'USDT',
-    amount: 0,
+    amount: 1.03,
     address: WALLETS[CEX.HUOBI].USDT[CHAINS.BSC],
     network: CHAINS.BSC,
   },

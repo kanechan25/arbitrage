@@ -58,7 +58,7 @@ export class OkxService {
   }
 
   async spotQuoteToBase(symbol: string, quoteAmount: number, watchedBasePrice?: number) {
-    // minimum notional: Binance requires min 5 USDT for most pairs
+    // minimum notional: requires min 5 USDT for most pairs
     return await this.cexCommonService.orderQuoteToBase(this.exchange, symbol, quoteAmount, watchedBasePrice);
   }
 }
