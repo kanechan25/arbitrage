@@ -14,13 +14,6 @@ export class BinanceService {
       enableRateLimit: true, // Helps to respect Binance's rate limits
     });
   }
-  async fetchBalance(symbol?: string[], type: WalletType = 'spot') {
-    return await this.cexCommonService.fetchCexBalance(this.exchange, symbol, type);
-  }
-  async spotQuoteToBase(symbol: string, quoteAmount: number, watchedBasePrice: number) {
-    // minimum notional: Binance requires min 5 USDT for most pairs
-    return await this.cexCommonService.spotQuoteToBase(this.exchange, symbol, quoteAmount, watchedBasePrice);
-  }
 
   async deposit2Wallets() {
     try {
@@ -54,8 +47,17 @@ export class BinanceService {
     }
   }
 
+  async fetchBalance(symbol?: string[], type: WalletType = 'spot') {
+    return await this.cexCommonService.fetchCexBalance(this.exchange, symbol, type);
+  }
+
   // get withdrawal info of a coin in that cex (withdrawal fees, minDeposit, maxDeposit, etc)
   async fetchWithdrawalInfo(coin: string) {
     return await this.cexCommonService.getInfoWithdrawalTokens(this.exchange, coin);
+  }
+
+  async spotQuoteToBase(symbol: string, quoteAmount: number, watchedBasePrice?: number) {
+    // minimum notional: Binance requires min 5 USDT for most pairs
+    return await this.cexCommonService.orderQuoteToBase(this.exchange, symbol, quoteAmount, watchedBasePrice);
   }
 }

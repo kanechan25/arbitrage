@@ -121,7 +121,7 @@ export class CexCommonService {
       };
     }
   }
-  async spotQuoteToBase(exchange: ccxt.Exchange, symbol: string, quoteAmount: number, watchedBasePrice?: number) {
+  async orderQuoteToBase(exchange: ccxt.Exchange, symbol: string, quoteAmount: number, watchedBasePrice?: number) {
     try {
       // Get market info to check minimum notional
       const markets = await exchange.loadMarkets();

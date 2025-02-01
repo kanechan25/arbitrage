@@ -15,14 +15,6 @@ export class BybitService {
     });
   }
 
-  async fetchBalance(symbol?: string[], type: WalletType = 'spot') {
-    // spot of bybit is Unified Trading
-    return await this.cexCommonService.fetchCexBalance(this.exchange, symbol, type);
-  }
-
-  async fetchWithdrawalInfo(coin: string) {
-    return await this.cexCommonService.getInfoWithdrawalTokens(this.exchange, coin);
-  }
   async deposit2Wallets() {
     try {
       const results: Record<string, any> = {};
@@ -55,8 +47,17 @@ export class BybitService {
     }
   }
 
+  async fetchBalance(symbol?: string[], type: WalletType = 'spot') {
+    // spot of bybit is Unified Trading
+    return await this.cexCommonService.fetchCexBalance(this.exchange, symbol, type);
+  }
+
+  async fetchWithdrawalInfo(coin: string) {
+    return await this.cexCommonService.getInfoWithdrawalTokens(this.exchange, coin);
+  }
+
   async spotQuoteToBase(symbol: string, quoteAmount: number, watchedBasePrice?: number) {
     // minimum notional: bybit requires min 5 USDT for most pairs
-    return await this.cexCommonService.spotQuoteToBase(this.exchange, symbol, quoteAmount, watchedBasePrice);
+    return await this.cexCommonService.orderQuoteToBase(this.exchange, symbol, quoteAmount, watchedBasePrice);
   }
 }

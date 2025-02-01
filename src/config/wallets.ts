@@ -142,7 +142,7 @@ export const okxTransfer2 = [
   {
     platform: CEX.BITGET,
     coin: 'USDT',
-    amount: 0,
+    amount: 5.11,
     address: WALLETS[CEX.BITGET].USDT[CHAINS.APTOS],
     network: CHAINS.APTOS,
   },
