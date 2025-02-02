@@ -76,6 +76,7 @@ export const WALLETS = Object.freeze({
       [CHAINS.ARB]: '0x18a61fab2d603bdb832b62dfbb3ce0b295df2227',
       [CHAINS.AVAX]: '0x18a61fab2d603bdb832b62dfbb3ce0b295df2227',
       [CHAINS.TRON]: 'TUFv6WUbWxtVse9QD1M8RvwoDKbRnc2txh',
+      [CHAINS.SOL]: '23i2vwvuaRYiZoc3BSdGt4LpGHfeyQibyfrtwijhwo8H',
     },
     ETH: {
       [CHAINS.TRON]: 'TUFv6WUbWxtVse9QD1M8RvwoDKbRnc2txh',
@@ -83,14 +84,14 @@ export const WALLETS = Object.freeze({
   },
 });
 
-// Withdraw Binance: BSC -> OPTIMISM -> APTOS -> MATIC -> ARB
+// Withdraw min 10 USDT Binance: BSC -> CELO -> OPTIMISM, AVAX, APTOS -> MATIC -> ARB
 export const binanceTransfer2 = [
   {
     platform: CEX.OKX,
     coin: 'USDT',
     amount: 0,
-    address: WALLETS[CEX.OKX].USDT[CHAINS.OPTIMISM],
-    network: CHAINS.OPTIMISM,
+    address: WALLETS[CEX.OKX].USDT[CHAINS.APTOS],
+    network: CHAINS.APTOS,
   },
   {
     platform: CEX.MEXC,
@@ -122,7 +123,7 @@ export const binanceTransfer2 = [
   },
 ];
 
-// Withdraw OKX: APTOS -> ARB -> OPTIMISM, TON
+// Withdraw USDT OKX: APTOS -> ARB -> OPTIMISM, TON
 export const okxTransfer2 = [
   {
     platform: CEX.BINANCE,
@@ -141,7 +142,7 @@ export const okxTransfer2 = [
   {
     platform: CEX.BITGET,
     coin: 'USDT',
-    amount: 0,
+    amount: 5.11,
     address: WALLETS[CEX.BITGET].USDT[CHAINS.APTOS],
     network: CHAINS.APTOS,
   },
@@ -161,7 +162,7 @@ export const okxTransfer2 = [
   },
 ];
 
-// Withdraw MEXC: BSC -> TON -> APTOS -> OPTIMISM -> ARB
+// Withdraw USDT MEXC: BSC -> TON -> APTOS -> OPTIMISM -> ARB
 export const mexcTransfer2 = [
   {
     platform: CEX.BINANCE,
@@ -200,7 +201,7 @@ export const mexcTransfer2 = [
   },
 ];
 
-// Withdraw Bitget: BSC -> APTOS -> AVAX -> TON, OPTIMISM -> ARB
+// Withdraw USDT Bitget: BSC -> APTOS -> AVAX -> TON, OPTIMISM -> ARB
 export const bitgetTransfer2 = [
   {
     platform: CEX.BINANCE,
@@ -226,7 +227,7 @@ export const bitgetTransfer2 = [
   {
     platform: CEX.HUOBI,
     coin: 'USDT',
-    amount: 0,
+    amount: 1.03,
     address: WALLETS[CEX.HUOBI].USDT[CHAINS.BSC],
     network: CHAINS.BSC,
   },
@@ -239,7 +240,7 @@ export const bitgetTransfer2 = [
   },
 ];
 
-// Withdraw Huobi: AVAX (locked!! have to upgrade) -> TRON (1.2$) -> SOL
+// Withdraw USDT Huobi: AVAX (locked!! have to upgrade) -> TRON (1.2$) -> SOL
 export const huobiTransfer2 = [
   {
     platform: CEX.BINANCE,
@@ -275,5 +276,44 @@ export const huobiTransfer2 = [
     amount: 0,
     address: WALLETS[CEX.BYBIT].USDT[CHAINS.TRON],
     network: CHAINS.TRON,
+  },
+];
+
+// Withdraw min 1 USDT Bybit: APTOS, MANTLE -> TON -> BSC, ARB, OPTIMISM, AVAX -> TRON
+export const bybitTransfer2 = [
+  {
+    platform: CEX.BINANCE,
+    coin: 'USDT',
+    amount: 0,
+    address: WALLETS[CEX.BINANCE].USDT[CHAINS.APTOS],
+    network: CHAINS.APTOS,
+  },
+  {
+    platform: CEX.OKX,
+    coin: 'USDT',
+    amount: 0,
+    address: WALLETS[CEX.OKX].USDT[CHAINS.APTOS],
+    network: CHAINS.APTOS,
+  },
+  {
+    platform: CEX.MEXC,
+    coin: 'USDT',
+    amount: 0,
+    address: WALLETS[CEX.MEXC].USDT[CHAINS.APTOS],
+    network: CHAINS.APTOS,
+  },
+  {
+    platform: CEX.BITGET,
+    coin: 'USDT',
+    amount: 0,
+    address: WALLETS[CEX.BITGET].USDT[CHAINS.APTOS],
+    network: CHAINS.APTOS,
+  },
+  {
+    platform: CEX.HUOBI,
+    coin: 'USDT',
+    amount: 0,
+    address: WALLETS[CEX.HUOBI].USDT[CHAINS.BSC],
+    network: CHAINS.BSC,
   },
 ];

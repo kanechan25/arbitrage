@@ -34,6 +34,7 @@ export async function analyzeExchangeLog(
     endTimestamp: '',
     duration: '',
     satisfiedPctCount: 0,
+    satisfiedProfitPctAvg: 0,
     averageSatisfiedTime: '',
     symbol: '',
   };
@@ -70,6 +71,7 @@ export async function analyzeExchangeLog(
             if (data && data?.maxExchange && data?.minExchange) {
               if (data.diffPercentage && data.diffPercentage > configProfitPctDiff) {
                 result.satisfiedPctCount++;
+                result.satisfiedProfitPctAvg += data.diffPercentage;
               }
               if (result.exchanges[data?.maxExchange]) {
                 result.exchanges[data?.maxExchange].maxExCount++;
@@ -83,7 +85,10 @@ export async function analyzeExchangeLog(
             console.error('Problematic entry:', entry);
           }
         }
-
+        result.satisfiedProfitPctAvg =
+          result.satisfiedPctCount > 0
+            ? Number((result.satisfiedProfitPctAvg / result.satisfiedPctCount).toFixed(4))
+            : 0;
         result.totalRows = logEntries.length;
         result.startTimestamp = logEntries[0]?.timestamp;
         result.endTimestamp = logEntries[logEntries.length - 1]?.timestamp;

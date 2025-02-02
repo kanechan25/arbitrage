@@ -108,7 +108,9 @@ export class PricesService {
       const priceDiff = maxPrice - minPrice;
       const diffPercentage = (priceDiff / minPrice) * 100;
 
-      this.logger.logInfo(` ${symbol}: Min: ${minPrice} (${minExchange}) | Max: ${maxPrice} (${maxExchange})`);
+      this.logger.logInfo(
+        ` ${symbol}: Min: ${minPrice} (${minExchange}) | Max: ${maxPrice} (${maxExchange}) | % Diff: ${diffPercentage.toFixed(4)}%`,
+      );
       const exchangePrices = priceEntries.reduce(
         (acc, entry) => ({
           ...acc,

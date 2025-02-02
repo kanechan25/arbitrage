@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { BybitService } from './bybit.service';
 import { BybitController } from './bybit.controller';
 import { PricesService } from '../prices.service';
-import { CexCommonService } from '../cex.service';
+import { CexCommonService } from '../cex.common.service';
 
 @Module({
   imports: [ConfigModule],

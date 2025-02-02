@@ -1,8 +1,8 @@
 import { binanceTransfer2 } from '@/config/wallets';
-import { ICurrencyInterface, WalletType, WithdrawParams } from '@/types/cex.types';
+import { WalletType } from '@/types/cex.types';
 import { Injectable } from '@nestjs/common';
 import * as ccxt from 'ccxt';
-import { CexCommonService } from '@/services/cex/cex.service';
+import { CexCommonService } from '@/services/cex/cex.common.service';
 @Injectable()
 export class BinanceService {
   private exchange: ccxt.binance;
@@ -14,45 +14,6 @@ export class BinanceService {
       enableRateLimit: true, // Helps to respect Binance's rate limits
     });
   }
-  async fetchBalance(symbol?: string[], type: WalletType = 'spot') {
-    return await this.cexCommonService.fetchCexBalance(this.exchange, symbol, type);
-  }
-  async spotQuoteToBase(symbol: string, quoteAmount: number, watchedBasePrice: number) {
-    try {
-      // Get market info to check minimum notional
-      const markets = await this.exchange.loadMarkets();
-      const market = markets[symbol];
-
-      const ticker = await this.exchange.fetchTicker(symbol);
-      const currentPrice = ticker.last;
-
-      const baseAmount = quoteAmount / currentPrice;
-      // Check minimum notional (Binance requires min 5 USDT for most pairs)
-      const notionalValue = baseAmount * currentPrice;
-      if (notionalValue < market.limits.cost.min) {
-        throw new Error(
-          `Order value (${notionalValue} USDT) is below minimum notional value of ${market.limits.cost.min} USDT`,
-        );
-      }
-      console.log('__ spotQuoteToBase: ', { watchedBasePrice, currentPrice, baseAmount, notionalValue });
-      // const order = await this.exchange.createMarketBuyOrder(symbol, baseAmount);
-      // return {
-      //   success: true,
-      //   data: order,
-      // };
-    } catch (error: any) {
-      let errorMessage = 'An error occurred while placing the order.';
-      if (error instanceof ccxt.BaseError) {
-        errorMessage = `CCXT Error: ${error.message}`;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      return {
-        success: false,
-        error: errorMessage,
-      };
-    }
-  }
 
   async deposit2Wallets() {
     try {
@@ -60,7 +21,7 @@ export class BinanceService {
       await Promise.all(
         binanceTransfer2.map(async (wallet) => {
           if (wallet.amount > 0) {
-            const withdrawResult = await this.withdrawCrypto({
+            const withdrawResult = await this.cexCommonService.withdrawCrypto(this.exchange, {
               coin: wallet.coin,
               amount: wallet.amount,
               address: wallet.address,
@@ -86,85 +47,17 @@ export class BinanceService {
     }
   }
 
-  async withdrawCrypto(params: WithdrawParams) {
-    try {
-      // First verify if withdrawal is possible
-      const withdrawInfo = await this.exchange.fetchCurrencies();
-      const coinInfo = withdrawInfo[params.coin];
-
-      if (!coinInfo || !coinInfo.active || !coinInfo.withdraw) {
-        throw new Error(`Withdrawals for ${params.coin} are currently disabled`);
-      }
-
-      const networks = coinInfo.networks;
-      let selectedNetwork = null;
-
-      if (params.network) {
-        selectedNetwork = networks[params.network];
-        if (!selectedNetwork) {
-          throw new Error(`Network ${params.network} not found for ${params.coin}`);
-        }
-      } else {
-        selectedNetwork = Object.values(networks)[0];
-      }
-
-      // Check minimum withdrawal
-      if (params.amount < selectedNetwork.withdrawMin) {
-        throw new Error(
-          `Amount ${params.amount} is below minimum withdrawal of ${selectedNetwork.withdrawMin} ${params.coin}`,
-        );
-      }
-
-      const withdrawal = await this.exchange.withdraw(params.coin, params.amount, params.address, params.tag, {
-        network: params.network,
-        memo: params.memo,
-      });
-
-      return {
-        success: true,
-        data: {
-          id: withdrawal.id,
-          txid: withdrawal.txid,
-          amount: withdrawal.amount,
-          fee: withdrawal.fee,
-          network: params.network,
-          status: withdrawal.status,
-        },
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
+  async fetchBalance(symbol?: string[], type: WalletType = 'spot') {
+    return await this.cexCommonService.fetchCexBalance(this.exchange, symbol, type);
   }
+
   // get withdrawal info of a coin in that cex (withdrawal fees, minDeposit, maxDeposit, etc)
-  async getWithdrawalInfo(coin: string) {
-    try {
-      const currencies = await this.exchange.fetchCurrencies();
-      const coinInfo = currencies[coin] as ICurrencyInterface;
+  async fetchWithdrawalInfo(coin: string) {
+    return await this.cexCommonService.getInfoWithdrawalTokens(this.exchange, coin);
+  }
 
-      if (!coinInfo) {
-        throw new Error(`Coin ${coin} not found`);
-      }
-
-      return {
-        success: true,
-        data: {
-          coin,
-          active: coinInfo.active,
-          withdrawEnabled: coinInfo.withdraw,
-          depositEnabled: coinInfo.deposit,
-          withdrawalFees: coinInfo.fees,
-          // networks: coinInfo.networks,
-          // coinInfo,
-        },
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
+  async spotQuoteToBase(symbol: string, quoteAmount: number, watchedBasePrice?: number) {
+    // minimum notional: Binance requires min 5 USDT for most pairs
+    return await this.cexCommonService.orderQuoteToBase(this.exchange, symbol, quoteAmount, watchedBasePrice);
   }
 }
