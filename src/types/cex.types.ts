@@ -57,9 +57,6 @@ export const CEX = Object.freeze({
   BITGET: 'bitget',
   BYBIT: 'bybit',
   HUOBI: 'huobi',
-  GATEIO: 'gateio',
-  KUCOIN: 'kucoin',
-  LBANK: 'lbank',
 });
 
 export const CHAINS = Object.freeze({

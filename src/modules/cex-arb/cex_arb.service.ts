@@ -7,7 +7,7 @@ import { BinanceService } from '@/services/cex/binance/binance.service';
 import { BitgetService } from '@/services/cex/bitget/bitget.service';
 import { BybitService } from '@/services/cex/bybit/bybit.service';
 import { OkxService } from '@/services/cex/okx/okx.service';
-// import { LOG_PATHS } from '@/constants';
+import { LOG_PATHS } from '@/constants';
 
 @Injectable()
 export class CexArbService implements OnModuleInit, OnModuleDestroy {
@@ -62,10 +62,10 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
         // CexArbService.fetchCount++;
         // console.log(`___________Fetch count: ${CexArbService.fetchCount}`);
         // this.logger.log('__justFindOutTickersOptnt: ', results);
-        // const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS, false);
-        // this.logger.log('__analysis: ', analysis);
-        const result = await this.bitgetService.deposit2Wallets();
-        this.logger.log('__result: ', result);
+        const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS, true);
+        this.logger.log('__analysis: ', analysis);
+        // const result = await this.bitgetService.deposit2Wallets();
+        // this.logger.log('__result: ', result);
         this.stopWatching();
         // await this.pricesService.delay();
       }

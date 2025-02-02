@@ -1,0 +1,17 @@
+export const USDT = Object.freeze({
+  ADA: 'ADA/USDT',
+  SOL: 'SOL/USDT',
+  TRUMP: 'TRUMP/USDT',
+  DOGE: 'DOGE/USDT',
+  SUI: 'SUI/USDT',
+  XRP: 'XRP/USDT',
+  WLD: 'WLD/USDT',
+  LINK: 'LINK/USDT',
+  DOT: 'DOT/USDT',
+  TRX: 'TRX/USDT',
+  TON: 'TON/USDT',
+  PENGU: 'PENGU/USDT',
+  MOVE: 'MOVE/USDT',
+  APT: 'APT/USDT',
+  LTC: 'LTC/USDT',
+});
