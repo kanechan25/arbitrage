@@ -1,26 +1,30 @@
 import { CEX } from '@/types/cex.types';
 import { USDT } from '@/config/tokens';
 
+interface TradingPairConfig {
+  defaultValue: number;
+  customValues?: Record<string, number>;
+}
+
+function generateTradingPairs(config: TradingPairConfig): Record<string, number> {
+  const result: Record<string, number> = {};
+  Object.values(USDT).forEach((pair) => {
+    result[pair] = config.customValues?.[pair] ?? config.defaultValue;
+  });
+
+  return result;
+}
+
 export default () => ({
   symbol: USDT.SOL,
   symbols: [USDT.PENGU, USDT.MOVE, USDT.TRUMP, USDT.WLD, USDT.APT, USDT.LTC],
-  min_profit_percentage: {
-    [USDT.ADA]: 0.21,
-    [USDT.SOL]: 0.21,
-    [USDT.TRUMP]: 0.21,
-    [USDT.DOGE]: 0.21,
-    [USDT.SUI]: 0.21,
-    [USDT.XRP]: 0.21,
-    [USDT.WLD]: 0.21,
-    [USDT.LINK]: 0.21,
-    [USDT.DOT]: 0.21,
-    [USDT.TRX]: 0.21,
-    [USDT.TON]: 0.21,
-    [USDT.PENGU]: 0.21,
-    [USDT.MOVE]: 0.21,
-    [USDT.APT]: 0.21,
-    [USDT.LTC]: 0.21,
-  },
+  min_profit_percentage: generateTradingPairs({
+    defaultValue: 0.21,
+    customValues: {
+      [USDT.ADA]: 0.2,
+      [USDT.SOL]: 0.2,
+    },
+  }),
   exchanges: [
     {
       name: CEX.BINANCE,
