@@ -105,23 +105,23 @@ export const CHAIN_BB = Object.freeze({
 });
 export const CHAIN_MX = Object.freeze({
   APTOS: 'APTOS',
-  ARBITRUM: 'ARBI',
-  AVAXC: 'CAVAX',
+  ARBITRUM: 'ARB',
+  AVAXC: 'AVAXC',
   BASE: 'BASE',
   BSC: 'BEP20',
-  OPTIMISM: 'OP',
-  SOL: 'SPL',
+  OPTIMISM: 'OPTIMISM',
+  SOL: 'SOL',
   TON: 'TON',
   TRON: 'TRC20',
 });
 export const CHAIN_HTX = Object.freeze({
   APTOS: 'APTOS',
-  ARBITRUM: 'ARBI',
-  AVAXC: 'CAVAX',
+  ARBITRUM: 'ARB',
+  AVAXC: 'AVAXC',
   BASE: 'BASE',
   BSC: 'BEP20',
-  OPTIMISM: 'OP',
-  SOL: 'SPL',
+  OPTIMISM: 'OPTIMISM',
+  SOL: 'SOL',
   TON: 'TON',
   TRON: 'TRC20',
 });

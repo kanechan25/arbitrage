@@ -84,7 +84,7 @@ export const WALLETS = Object.freeze({
   },
 });
 
-// Withdraw min 10 USDT Binance: BSC -> CELO -> OPTIMISM, AVAXC, APT -> MATIC -> ARB
+// ✔ Withdraw min 10 USDT Binance: BSC -> CELO -> OPTIMISM, AVAXC, APT -> MATIC -> ARB
 export const binanceTransfer2 = [
   {
     platform: CEX.OKX,
@@ -123,7 +123,7 @@ export const binanceTransfer2 = [
   },
 ];
 
-// Withdraw min 0.1 USDT OKX: APT -> ARB -> OPTIMISM, TON -> AVAXC
+// ✔ Withdraw min 0.1 USDT OKX: APT -> ARB -> OPTIMISM, TON -> AVAXC
 export const okxTransfer2 = [
   {
     platform: CEX.BINANCE,
@@ -162,7 +162,7 @@ export const okxTransfer2 = [
   },
 ];
 
-// Withdraw USDT MEXC: BSC -> TON -> APTOS -> OPTIMISM -> ARB
+// Withdraw min 10 USDT MEXC: BSC -> TON -> APTOS -> OPTIMISM -> ARB
 export const mexcTransfer2 = [
   {
     platform: CEX.BINANCE,
@@ -279,7 +279,7 @@ export const huobiTransfer2 = [
   },
 ];
 
-// Withdraw min 1 USDT Bybit: APT, MANTLE -> TON -> BSC, ARB, OPTIMISM, AVAXC -> TRON
+// ✔ Withdraw min 1 USDT Bybit: APT, MANTLE -> TON -> BSC, ARB, OPTIMISM, AVAXC -> TRON
 export const bybitTransfer2 = [
   {
     platform: CEX.BINANCE,

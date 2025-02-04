@@ -7,6 +7,7 @@ import { BinanceService } from '@/services/cex/binance/binance.service';
 import { BitgetService } from '@/services/cex/bitget/bitget.service';
 import { BybitService } from '@/services/cex/bybit/bybit.service';
 import { OkxService } from '@/services/cex/okx/okx.service';
+import { MexcService } from '@/services/cex/mexc/mexc.service';
 // import { LOG_PATHS } from '@/constants';
 
 @Injectable()
@@ -19,6 +20,7 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private binanceService: BinanceService,
     private okxService: OkxService,
+    private mexcService: MexcService,
     private bitgetService: BitgetService,
     private bybitService: BybitService,
     private configService: ConfigService,
@@ -64,7 +66,7 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
         // this.logger.log('__justFindOutTickersOptnt: ', results);
         // const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS, true);
         // this.logger.log('__analysis: ', analysis);
-        const result = await this.bitgetService.deposit2Wallets();
+        const result = await this.mexcService.fetchWithdrawalInfo('USDT');
         this.logger.log('__result: ', result);
         this.stopWatching();
         // await this.pricesService.delay();
