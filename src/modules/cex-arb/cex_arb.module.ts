@@ -9,6 +9,7 @@ import { BitgetService } from '@/services/cex/bitget/bitget.service';
 import { LoggerService } from '@/services/_logger.service';
 import { BybitService } from '@/services/cex/bybit/bybit.service';
 import { MexcService } from '@/services/cex/mexc/mexc.service';
+import { HuobiService } from '@/services/cex/huobi/huobi.service';
 import { CexCommonService } from '@/services/cex/cex.common.service';
 
 @Module({
@@ -23,6 +24,7 @@ import { CexCommonService } from '@/services/cex/cex.common.service';
     BitgetService,
     BybitService,
     MexcService,
+    HuobiService,
     LoggerService,
   ],
   exports: [CexArbService],

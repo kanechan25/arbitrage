@@ -115,14 +115,10 @@ export const CHAIN_MX = Object.freeze({
   TRON: 'TRC20',
 });
 export const CHAIN_HTX = Object.freeze({
-  APTOS: 'APTOS',
   ARBITRUM: 'ARB',
-  AVAXC: 'AVAXC',
-  BASE: 'BASE',
+  AVAXC: 'AVAXCCHAIN',
   BSC: 'BEP20',
-  OPTIMISM: 'OPTIMISM',
   SOL: 'SOL',
-  TON: 'TON',
   TRON: 'TRC20',
 });
 
