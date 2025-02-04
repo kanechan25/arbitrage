@@ -1,8 +1,11 @@
 export const LOG_PATHS = [
-  'logs/_1738339416_prices_APT_USDT.log',
-  'logs/_1738339416_prices_LTC_USDT.log',
-  'logs/_1738339416_prices_MOVE_USDT.log',
-  'logs/_1738339416_prices_PENGU_USDT.log',
-  'logs/_1738339416_prices_TRUMP_USDT.log',
-  'logs/_1738339416_prices_WLD_USDT.log',
+  'logs/_1736868642_prices_ETH_USDT.log',
+  'logs/_1737045883_prices_ETH_USDT.log',
+  'logs/_1737173052_prices_BTC_USDT.log',
+  'logs/_1737306033_prices_ADA_USDT.log',
+  'logs/_1737306033_prices_BNB_USDT.log',
+  'logs/_1737306033_prices_BTC_USDT.log',
+  'logs/_1737306033_prices_SOL_USDT.log',
+  'logs/_1737780595_prices_ADA_USDT.log',
+  'logs/_1737780595_prices_SOL_USDT.log',
 ];

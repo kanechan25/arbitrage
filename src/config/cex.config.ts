@@ -17,12 +17,11 @@ function generateTradingPairs(config: TradingPairConfig): Record<string, number>
 
 export default () => ({
   symbol: USDT.SOL,
-  symbols: [USDT.PENGU, USDT.MOVE, USDT.TRUMP, USDT.WLD, USDT.APT, USDT.LTC],
+  symbols: [USDT.ARB, USDT.XRP, USDT.TRUMP, USDT.PENGU, USDT.MOVE, USDT.ALGO],
   min_profit_percentage: generateTradingPairs({
-    defaultValue: 0.21,
+    defaultValue: 0.2,
     customValues: {
-      [USDT.ADA]: 0.2,
-      [USDT.SOL]: 0.2,
+      // [USDT.ADA]: 0.2, // add custom values for specific pairs
     },
   }),
   exchanges: [
