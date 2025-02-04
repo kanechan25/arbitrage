@@ -7,7 +7,7 @@ import { BinanceService } from '@/services/cex/binance/binance.service';
 import { BitgetService } from '@/services/cex/bitget/bitget.service';
 import { BybitService } from '@/services/cex/bybit/bybit.service';
 import { OkxService } from '@/services/cex/okx/okx.service';
-// import { LOG_PATHS } from '@/constants';
+import { LOG_PATHS } from '@/constants';
 
 @Injectable()
 export class CexArbService implements OnModuleInit, OnModuleDestroy {

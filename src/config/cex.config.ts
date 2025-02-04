@@ -1,51 +1,58 @@
+import { CEX } from '@/types/cex.types';
+import { USDT } from '@/config/tokens';
+
+interface TradingPairConfig {
+  defaultValue: number;
+  customValues?: Record<string, number>;
+}
+
+function generateTradingPairs(config: TradingPairConfig): Record<string, number> {
+  const result: Record<string, number> = {};
+  Object.values(USDT).forEach((pair) => {
+    result[pair] = config.customValues?.[pair] ?? config.defaultValue;
+  });
+
+  return result;
+}
+
 export default () => ({
-  symbol: 'ETH/USDT',
-  symbols: ['PENGU/USDT', 'MOVE/USDT', 'TRUMP/USDT', 'WLD/USDT', 'APT/USDT', 'LTC/USDT'],
-  min_profit_percentage: {
-    'ADA/USDT': 0.21,
-    'SOL/USDT': 0.21,
-    'TRUMP/USDT': 0.21,
-    'DOGE/USDT': 0.21,
-    'SUI/USDT': 0.21,
-    'XRP/USDT': 0.21,
-    'WLD/USDT': 0.21,
-    'LINK/USDT': 0.21,
-    'DOT/USDT': 0.21,
-    'TRX/USDT': 0.21,
-    'TON/USDT': 0.21,
-    'PENGU/USDT': 0.21,
-    'MOVE/USDT': 0.21,
-    'APT/USDT': 0.21,
-    'LTC/USDT': 0.21,
-  },
+  symbol: USDT.SOL,
+  symbols: [USDT.PENGU, USDT.MOVE, USDT.TRUMP, USDT.WLD, USDT.APT, USDT.LTC],
+  min_profit_percentage: generateTradingPairs({
+    defaultValue: 0.21,
+    customValues: {
+      [USDT.ADA]: 0.2,
+      [USDT.SOL]: 0.2,
+    },
+  }),
   exchanges: [
     {
-      name: 'binance',
+      name: CEX.BINANCE,
       apiKey: process.env.BINANCE_API_KEY,
       apiSecret: process.env.BINANCE_API_SECRET,
     },
     {
-      name: 'okx',
+      name: CEX.OKX,
       apiKey: process.env.OKX_API_KEY,
       apiSecret: process.env.OKX_API_SECRET,
     },
     {
-      name: 'mexc',
+      name: CEX.MEXC,
       apiKey: process.env.MEXC_API_KEY,
       apiSecret: process.env.MEXC_API_SECRET,
     },
     {
-      name: 'bitget',
+      name: CEX.BITGET,
       apiKey: process.env.BITGET_API_KEY,
       apiSecret: process.env.BITGET_API_SECRET,
     },
     {
-      name: 'bybit',
+      name: CEX.BYBIT,
       apiKey: process.env.BYBIT_API_KEY,
       apiSecret: process.env.BYBIT_API_SECRET,
     },
     {
-      name: 'huobi',
+      name: CEX.HUOBI,
       apiKey: process.env.HUOBI_API_KEY,
       apiSecret: process.env.HUOBI_API_SECRET,
     },

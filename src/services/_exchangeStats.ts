@@ -1,4 +1,4 @@
-import { IExchangeAnalysis, IListenTicker } from '@/types/cex.types';
+import { CEX, IExchangeAnalysis, IListenTicker } from '@/types/cex.types';
 import { createLogger, transports, format } from 'winston';
 import { ConfigService } from '@nestjs/config';
 import { calculateAverageTime, calculateTimeDifference } from '@/utils';
@@ -20,15 +20,12 @@ export async function analyzeExchangeLog(
   const result: IExchangeAnalysis = {
     totalRows: 0,
     exchanges: {
-      binance: { maxExCount: 0, maxExPct: 0, minExCount: 0, minExPct: 0 },
-      bitget: { maxExCount: 0, maxExPct: 0, minExCount: 0, minExPct: 0 },
-      bybit: { maxExCount: 0, maxExPct: 0, minExCount: 0, minExPct: 0 },
-      gateio: { maxExCount: 0, maxExPct: 0, minExCount: 0, minExPct: 0 },
-      huobi: { maxExCount: 0, maxExPct: 0, minExCount: 0, minExPct: 0 },
-      kucoin: { maxExCount: 0, maxExPct: 0, minExCount: 0, minExPct: 0 },
-      lbank: { maxExCount: 0, maxExPct: 0, minExCount: 0, minExPct: 0 },
-      mexc: { maxExCount: 0, maxExPct: 0, minExCount: 0, minExPct: 0 },
-      okx: { maxExCount: 0, maxExPct: 0, minExCount: 0, minExPct: 0 },
+      [CEX.BINANCE]: { maxExCount: 0, maxExPct: 0, minExCount: 0, minExPct: 0 },
+      [CEX.BITGET]: { maxExCount: 0, maxExPct: 0, minExCount: 0, minExPct: 0 },
+      [CEX.BYBIT]: { maxExCount: 0, maxExPct: 0, minExCount: 0, minExPct: 0 },
+      [CEX.HUOBI]: { maxExCount: 0, maxExPct: 0, minExCount: 0, minExPct: 0 },
+      [CEX.MEXC]: { maxExCount: 0, maxExPct: 0, minExCount: 0, minExPct: 0 },
+      [CEX.OKX]: { maxExCount: 0, maxExPct: 0, minExCount: 0, minExPct: 0 },
     },
     startTimestamp: '',
     endTimestamp: '',
