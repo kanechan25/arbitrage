@@ -1,5 +1,6 @@
 export const USDT = Object.freeze({
   ADA: 'ADA/USDT',
+  ALGO: 'ALGO/USDT',
   APT: 'APT/USDT',
   ARB: 'ARB/USDT',
   BNB: 'BNB/USDT',
