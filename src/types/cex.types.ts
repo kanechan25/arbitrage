@@ -59,14 +59,69 @@ export const CEX = Object.freeze({
   HUOBI: 'huobi',
 });
 
-export const CHAINS = Object.freeze({
-  APTOS: 'APTOS',
-  ARB: 'ARBITRUM',
-  AVAX: 'AVAX',
+export const CHAIN_BN = Object.freeze({
+  APTOS: 'APT',
+  ARBITRUM: 'ARBITRUM',
+  AVAXC: 'AVAXC',
   BASE: 'BASE',
   BSC: 'BEP20',
   OPTIMISM: 'OPTIMISM',
   SOL: 'SOL',
+  TON: 'TON',
+  TRON: 'TRC20',
+});
+export const CHAIN_OKX = Object.freeze({
+  APTOS: 'APT',
+  ARBITRUM: 'ARBONE',
+  AVAXC: 'AVAXC',
+  BASE: 'BASE',
+  BSC: 'BEP20',
+  OPTIMISM: 'OPTIMISM',
+  SOL: 'SOL',
+  TON: 'TON',
+  TRON: 'TRC20',
+});
+export const CHAIN_BG = Object.freeze({
+  APTOS: 'APT',
+  ARBITRUM: 'ARB',
+  AVAXC: 'AVAXC-CHAIN',
+  BASE: 'BASE',
+  BSC: 'BEP20',
+  OPTIMISM: 'OPTIMISM',
+  SOL: 'SOL',
+  TON: 'TON',
+  TRON: 'TRC20',
+});
+export const CHAIN_BB = Object.freeze({
+  APTOS: 'APTOS',
+  ARBITRUM: 'ARBI',
+  AVAXC: 'CAVAX',
+  BASE: 'BASE',
+  BSC: 'BEP20',
+  OPTIMISM: 'OP',
+  SOL: 'SPL',
+  TON: 'TON',
+  TRON: 'TRC20',
+});
+export const CHAIN_MX = Object.freeze({
+  APTOS: 'APTOS',
+  ARBITRUM: 'ARBI',
+  AVAXC: 'CAVAX',
+  BASE: 'BASE',
+  BSC: 'BEP20',
+  OPTIMISM: 'OP',
+  SOL: 'SPL',
+  TON: 'TON',
+  TRON: 'TRC20',
+});
+export const CHAIN_HTX = Object.freeze({
+  APTOS: 'APTOS',
+  ARBITRUM: 'ARBI',
+  AVAXC: 'CAVAX',
+  BASE: 'BASE',
+  BSC: 'BEP20',
+  OPTIMISM: 'OP',
+  SOL: 'SPL',
   TON: 'TON',
   TRON: 'TRC20',
 });
@@ -75,7 +130,7 @@ export interface WithdrawParams {
   coin: string;
   amount: number;
   address: string;
-  network: string; // Specify network from CHAINS{}
+  network: string; // Specify network from CHAIN_{CEX}
   memo?: string; // Required for some coins like XRP
   tag?: string; // Required for some coins
 }
