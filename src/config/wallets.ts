@@ -201,7 +201,7 @@ export const mexcTransfer2 = [
   },
 ];
 
-// Withdraw USDT Bitget: BSC -> APT -> AVAXC -> TON, OPTIMISM -> ARB
+// ✔ Withdraw min 10USDT Bitget: BSC -> APT -> AVAXC -> TON, OPTIMISM -> ARB
 export const bitgetTransfer2 = [
   {
     platform: CEX.BINANCE,
@@ -209,6 +209,7 @@ export const bitgetTransfer2 = [
     amount: 0,
     address: WALLETS[CEX.BINANCE].USDT[CHAIN_BN.BSC],
     network: CHAIN_BG.BSC,
+    chain: CHAIN_BN.BSC,
   },
   {
     platform: CEX.OKX,
@@ -216,6 +217,7 @@ export const bitgetTransfer2 = [
     amount: 0,
     address: WALLETS[CEX.OKX].USDT[CHAIN_OKX.APTOS],
     network: CHAIN_BG.APTOS,
+    chain: 'Aptos',
   },
   {
     platform: CEX.BYBIT,
@@ -223,13 +225,15 @@ export const bitgetTransfer2 = [
     amount: 0,
     address: WALLETS[CEX.BYBIT].USDT[CHAIN_BB.BSC],
     network: CHAIN_BG.BSC,
+    chain: CHAIN_BN.BSC,
   },
   {
     platform: CEX.HUOBI,
     coin: 'USDT',
-    amount: 0.01,
+    amount: 0,
     address: WALLETS[CEX.HUOBI].USDT[CHAIN_HTX.BSC],
     network: CHAIN_BG.BSC,
+    chain: CHAIN_BN.BSC,
   },
   {
     platform: CEX.MEXC,
@@ -237,6 +241,7 @@ export const bitgetTransfer2 = [
     amount: 0,
     address: WALLETS[CEX.MEXC].USDT[CHAIN_MX.BSC],
     network: CHAIN_BG.BSC,
+    chain: CHAIN_BN.BSC,
   },
 ];
 

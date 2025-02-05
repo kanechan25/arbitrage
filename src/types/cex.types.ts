@@ -129,6 +129,7 @@ export interface WithdrawParams {
   network: string; // Specify network from CHAIN_{CEX}
   memo?: string; // Required for some coins like XRP
   tag?: string; // Required for some coins
+  chain?: string; // Specify chain from CHAIN_{CEX}
 }
 
 export interface ICurrencyInterface extends ccxt.CurrencyInterface {

@@ -101,6 +101,7 @@ export class CexCommonService {
       const withdrawal = await exchange.withdraw(params.coin, params.amount, params.address, params.tag, {
         network: params.network,
         memo: params.memo,
+        chain: params?.chain,
       });
 
       return {
@@ -123,7 +124,7 @@ export class CexCommonService {
   }
   async orderQuoteToBase(exchange: ccxt.Exchange, symbol: string, quoteAmount: number, watchedBasePrice?: number) {
     try {
-      // Get market info to check minimum notional
+      // symbol: DOGE/USDT, quoteAmount: 10 USDT
       const markets = await exchange.loadMarkets();
       const market = markets[symbol];
 
@@ -139,7 +140,16 @@ export class CexCommonService {
         );
       }
       console.log('__ spotQuoteToBase: ', { watchedBasePrice, currentPrice, baseAmount, notionalValue });
-      const order = await exchange.createMarketBuyOrder(symbol, baseAmount);
+
+      let order: any;
+      if (exchange.id === 'bitget') {
+        order = await exchange.createOrder(symbol, 'market', 'buy', undefined, undefined, {
+          cost: quoteAmount,
+        });
+      } else {
+        order = await exchange.createMarketBuyOrder(symbol, baseAmount);
+      }
+
       return {
         success: true,
         data: order,

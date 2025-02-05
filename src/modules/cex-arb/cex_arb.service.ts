@@ -68,7 +68,7 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
         // this.logger.log('__justFindOutTickersOptnt: ', results);
         // const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS, true);
         // this.logger.log('__analysis: ', analysis);
-        const result = await this.huobiService.fetchWithdrawalInfo('USDT');
+        const result = await this.bitgetService.fetchWithdrawalInfo('USDT');
         this.logger.log('__result: ', result);
         this.stopWatching();
         // await this.pricesService.delay();
