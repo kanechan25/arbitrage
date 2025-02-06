@@ -9,7 +9,7 @@ import { BybitService } from '@/services/cex/bybit/bybit.service';
 import { OkxService } from '@/services/cex/okx/okx.service';
 import { MexcService } from '@/services/cex/mexc/mexc.service';
 import { HuobiService } from '@/services/cex/huobi/huobi.service';
-import { LOG_PATHS } from '@/constants';
+// import { LOG_PATHS } from '@/constants/logs';
 
 @Injectable()
 export class CexArbService implements OnModuleInit, OnModuleDestroy {
@@ -66,10 +66,10 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
         // CexArbService.fetchCount++;
         // console.log(`___________Fetch count: ${CexArbService.fetchCount}`);
         // this.logger.log('__justFindOutTickersOptnt: ', results);
-        const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS, true);
-        this.logger.log('__analysis: ', analysis);
-        // const result = await this.huobiService.withdraw2Cex();
-        // this.logger.log('__result: ', result);
+        // const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS, true);
+        // this.logger.log('__analysis: ', analysis);
+        const result = await this.binanceService.fetchBalance(['USDT']);
+        this.logger.log('__result: ', result);
         this.stopWatching();
         // await this.pricesService.delay();
       }

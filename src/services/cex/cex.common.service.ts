@@ -167,4 +167,45 @@ export class CexCommonService {
       };
     }
   }
+
+  async orderBaseToQuote(exchange: ccxt.Exchange, symbol: string, baseAmount: number, watchedBasePrice?: number) {
+    try {
+      // symbol: DOGE/USDT, baseAmount: 10.12 DOGE
+      const markets = await exchange.loadMarkets();
+      const market = markets[symbol];
+
+      const ticker = await exchange.fetchTicker(symbol);
+      const currentPrice = ticker.last;
+
+      const notionalValue = baseAmount * currentPrice;
+      if (notionalValue < market.limits.cost.min) {
+        throw new Error(
+          `Order value (${notionalValue} USDT) is below minimum notional value of ${market.limits.cost.min} USDT`,
+        );
+      }
+      console.log('__ spotBaseToQuote: ', { watchedBasePrice, currentPrice, baseAmount, notionalValue });
+      let order: any;
+      if (exchange.id === 'bitget') {
+        order = await exchange.createOrder(symbol, 'market', 'sell', baseAmount);
+      } else {
+        order = await exchange.createMarketSellOrder(symbol, baseAmount);
+      }
+
+      return {
+        success: true,
+        data: order,
+      };
+    } catch (error: any) {
+      let errorMessage = 'An error occurred while placing the order.';
+      if (error instanceof ccxt.BaseError) {
+        errorMessage = `CCXT Error: ${error.message}`;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
 }
