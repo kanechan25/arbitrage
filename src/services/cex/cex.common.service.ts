@@ -142,7 +142,7 @@ export class CexCommonService {
       console.log('__ spotQuoteToBase: ', { watchedBasePrice, currentPrice, baseAmount, notionalValue });
 
       let order: any;
-      if (exchange.id === 'bitget') {
+      if (exchange.id === 'bitget' || exchange.id === 'huobi') {
         order = await exchange.createOrder(symbol, 'market', 'buy', undefined, undefined, {
           cost: quoteAmount,
         });

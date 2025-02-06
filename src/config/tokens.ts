@@ -11,7 +11,7 @@ export const USDT = Object.freeze({
   HBAR: 'HBAR/USDT',
   LINK: 'LINK/USDT',
   LTC: 'LTC/USDT',
-  MOVE: 'MOVE/USDT',
+  MOVE: 'MOVE/USDT', // huobi is not tradable
   PENGU: 'PENGU/USDT',
   TON: 'TON/USDT',
   TRUMP: 'TRUMP/USDT',

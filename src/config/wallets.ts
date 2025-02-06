@@ -24,7 +24,7 @@ export const WALLETS = Object.freeze({
       [CHAIN_OKX.OPTIMISM]: '0x971dd7481e7e8b4261641728f4c66dbbbf69d20e',
       [CHAIN_OKX.APTOS]: '0x623beddaf733a80b9767007815de0b842ff1b0badaefa57d72f2b191c59a5277',
       [CHAIN_OKX.TON]: 'UQCBoLqxWcRJGoYVc4e2GbRSAxOEtEXokKEPWrbFrephbd7q',
-      [CHAIN_OKX.TRON]: 'TNccKLY3ajBfS55ypo1ys3XKzFuruMqwFe',
+      [CHAIN_OKX.TRON]: 'TL26CjpwfvLKTTMSEAEdxSYmbhzAub8m3h',
     },
     ETH: {
       [CHAIN_OKX.ARBITRUM]: '0x971dd7481e7e8b4261641728f4c66dbbbf69d20e',
@@ -245,7 +245,7 @@ export const bitgetTransfer2 = [
   },
 ];
 
-// Withdraw USDT Huobi: AVAXC (locked!! have to upgrade) -> TRON (1.2$) -> SOL
+// Withdraw min 01 USDT Huobi: AVAXC (locked!! have to upgrade) -> TRON (1.2$) -> SOL
 export const huobiTransfer2 = [
   {
     platform: CEX.BINANCE,
@@ -264,7 +264,7 @@ export const huobiTransfer2 = [
   {
     platform: CEX.MEXC,
     coin: 'USDT',
-    amount: 0,
+    amount: 1.11,
     address: WALLETS[CEX.MEXC].USDT[CHAIN_MX.TRON],
     network: CHAIN_HTX.TRON,
   },

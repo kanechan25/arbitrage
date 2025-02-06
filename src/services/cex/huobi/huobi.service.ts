@@ -19,6 +19,32 @@ export class HuobiService {
   async withdraw2Cex() {
     try {
       const results: Record<string, any> = {};
+
+      // First verify all addresses are whitelisted
+      for (const wallet of huobiTransfer2) {
+        if (wallet.amount > 0) {
+          try {
+            const addressInfo = await this.exchange.fetchWithdrawals();
+            const isWhitelisted = addressInfo.some(
+              (addr: any) => addr.address === wallet.address && addr.currency === wallet.coin.toLowerCase(),
+            );
+
+            if (!isWhitelisted) {
+              throw new Error(
+                `Address ${wallet.address} for ${wallet.coin} is not whitelisted. ` +
+                  'Please add it to your Huobi address book first and wait 24-48 hours before withdrawing.',
+              );
+            }
+          } catch (error) {
+            results[wallet.platform] = {
+              success: false,
+              error: error.message,
+            };
+            continue;
+          }
+        }
+      }
+
       await Promise.all(
         huobiTransfer2.map(async (wallet) => {
           if (wallet.amount > 0) {
@@ -57,7 +83,7 @@ export class HuobiService {
   }
 
   async spotQuoteToBase(symbol: string, quoteAmount: number, watchedBasePrice?: number) {
-    // minimum notional: requires min 5 USDT for most pairs
+    // minimum notional: requires min 10 USDT for most pairs
     return await this.cexCommonService.orderQuoteToBase(this.exchange, symbol, quoteAmount, watchedBasePrice);
   }
 }
