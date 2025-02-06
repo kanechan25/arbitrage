@@ -7,6 +7,8 @@ import { BinanceService } from '@/services/cex/binance/binance.service';
 import { BitgetService } from '@/services/cex/bitget/bitget.service';
 import { BybitService } from '@/services/cex/bybit/bybit.service';
 import { OkxService } from '@/services/cex/okx/okx.service';
+import { MexcService } from '@/services/cex/mexc/mexc.service';
+import { HuobiService } from '@/services/cex/huobi/huobi.service';
 // import { LOG_PATHS } from '@/constants';
 
 @Injectable()
@@ -19,8 +21,10 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private binanceService: BinanceService,
     private okxService: OkxService,
+    private mexcService: MexcService,
     private bitgetService: BitgetService,
     private bybitService: BybitService,
+    private huobiService: HuobiService,
     private configService: ConfigService,
     private pricesService: PricesService,
   ) {

@@ -16,7 +16,7 @@ export class BitgetService {
     });
   }
 
-  async deposit2Wallets() {
+  async withdraw2Cex() {
     try {
       const results: Record<string, any> = {};
       await Promise.all(
@@ -27,6 +27,7 @@ export class BitgetService {
               amount: wallet.amount,
               address: wallet.address,
               network: wallet.network,
+              chain: wallet.chain,
             });
             results[wallet.platform] = withdrawResult;
           } else {
@@ -57,7 +58,7 @@ export class BitgetService {
   }
 
   async spotQuoteToBase(symbol: string, quoteAmount: number, watchedBasePrice?: number) {
-    // minimum notional: requires min 5 USDT for most pairs
+    // minimum notional: requires min 1 (just 01) USDT for most pairs
     return await this.cexCommonService.orderQuoteToBase(this.exchange, symbol, quoteAmount, watchedBasePrice);
   }
 }

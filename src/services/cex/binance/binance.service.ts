@@ -15,7 +15,7 @@ export class BinanceService {
     });
   }
 
-  async deposit2Wallets() {
+  async withdraw2Cex() {
     try {
       const results: Record<string, any> = {};
       await Promise.all(

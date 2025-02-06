@@ -2,16 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { WalletType } from '@/types/cex.types';
 import * as ccxt from 'ccxt';
 import { CexCommonService } from '@/services/cex/cex.common.service';
-import { bybitTransfer2 } from '@/config/wallets';
+import { mexcTransfer2 } from '@/config/wallets';
 
 @Injectable()
-export class BybitService {
-  private exchange: ccxt.bybit;
+export class MexcService {
+  private exchange: ccxt.mexc;
 
   constructor(private cexCommonService: CexCommonService) {
-    this.exchange = new ccxt.bybit({
-      apiKey: process.env.BYBIT_API_KEY,
-      secret: process.env.BYBIT_API_SECRET,
+    this.exchange = new ccxt.mexc({
+      apiKey: process.env.MEXC_API_KEY,
+      secret: process.env.MEXC_API_SECRET,
     });
   }
 
@@ -19,7 +19,7 @@ export class BybitService {
     try {
       const results: Record<string, any> = {};
       await Promise.all(
-        bybitTransfer2.map(async (wallet) => {
+        mexcTransfer2.map(async (wallet) => {
           if (wallet.amount > 0) {
             const withdrawResult = await this.cexCommonService.withdrawCrypto(this.exchange, {
               coin: wallet.coin,

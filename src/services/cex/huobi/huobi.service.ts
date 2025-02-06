@@ -1,17 +1,18 @@
-import { Injectable } from '@nestjs/common';
 import { WalletType } from '@/types/cex.types';
+import { Injectable } from '@nestjs/common';
 import * as ccxt from 'ccxt';
 import { CexCommonService } from '@/services/cex/cex.common.service';
-import { bybitTransfer2 } from '@/config/wallets';
+import { huobiTransfer2 } from '@/config/wallets';
 
 @Injectable()
-export class BybitService {
-  private exchange: ccxt.bybit;
+export class HuobiService {
+  private exchange: ccxt.huobi;
 
   constructor(private cexCommonService: CexCommonService) {
-    this.exchange = new ccxt.bybit({
-      apiKey: process.env.BYBIT_API_KEY,
-      secret: process.env.BYBIT_API_SECRET,
+    this.exchange = new ccxt.huobi({
+      apiKey: process.env.HUOBI_API_KEY,
+      secret: process.env.HUOBI_API_SECRET,
+      enableRateLimit: true,
     });
   }
 
@@ -19,7 +20,7 @@ export class BybitService {
     try {
       const results: Record<string, any> = {};
       await Promise.all(
-        bybitTransfer2.map(async (wallet) => {
+        huobiTransfer2.map(async (wallet) => {
           if (wallet.amount > 0) {
             const withdrawResult = await this.cexCommonService.withdrawCrypto(this.exchange, {
               coin: wallet.coin,
@@ -48,16 +49,15 @@ export class BybitService {
   }
 
   async fetchBalance(symbol?: string[], type: WalletType = 'spot') {
-    // spot of bybit is Unified Trading
     return await this.cexCommonService.fetchCexBalance(this.exchange, symbol, type);
   }
-
+  // get withdrawal info of a coin in that cex (withdrawal fees, minDeposit, maxDeposit, etc)
   async fetchWithdrawalInfo(coin: string) {
     return await this.cexCommonService.getInfoWithdrawalTokens(this.exchange, coin);
   }
 
   async spotQuoteToBase(symbol: string, quoteAmount: number, watchedBasePrice?: number) {
-    // minimum notional: bybit requires min 5 USDT for most pairs
+    // minimum notional: requires min 5 USDT for most pairs
     return await this.cexCommonService.orderQuoteToBase(this.exchange, symbol, quoteAmount, watchedBasePrice);
   }
 }
