@@ -61,4 +61,7 @@ export class BitgetService {
     // minimum notional: requires min 1 (just 01) USDT for most pairs
     return await this.cexCommonService.orderQuoteToBase(this.exchange, symbol, quoteAmount, watchedBasePrice);
   }
+  async spotBaseToQuote(symbol: string, baseAmount: number, watchedBasePrice?: number) {
+    return await this.cexCommonService.orderBaseToQuote(this.exchange, symbol, baseAmount, watchedBasePrice);
+  }
 }
