@@ -195,7 +195,7 @@ export const mexcTransfer2 = [
   {
     platform: CEX.HUOBI,
     coin: 'USDT',
-    amount: 0,
+    amount: 10.1,
     address: WALLETS[CEX.HUOBI].USDT[CHAIN_HTX.BSC],
     network: CHAIN_MX.BSC,
   },
