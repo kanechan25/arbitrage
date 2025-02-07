@@ -57,6 +57,7 @@ export interface ISimulationResult {
   data: Record<string, IWalletBalance>;
   totalBalances: Record<string, number>;
   simulationResults?: string[];
+  profitDetails?: string[];
   warnings?: string[];
   error?: string | null;
 }

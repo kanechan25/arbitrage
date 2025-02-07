@@ -240,6 +240,7 @@ export class CexCommonService {
       simulationResults: [] as string[],
       warnings: [] as string[],
       totalBalances: this.calculateTotalBalances(),
+      profitDetails: [] as string[],
     };
     try {
       satisfiedResults.forEach((result) => {
@@ -265,26 +266,42 @@ export class CexCommonService {
           );
           return;
         }
+        // Calculate real profit
+        const grossProfit = buyBaseAmount - sellBaseAmount;
+        const configProfitPctDiff = this.configService.get('min_profit_percentage')[symbol];
+        const deductedProfit = grossProfit * (diffPercentage / configProfitPctDiff);
+        const realProfit = grossProfit - deductedProfit;
+
         // If we reach here, we have sufficient balances => proceed with the simulation
         // Update minExchange balances (buy)
         this.currentCexBalances[minExchange][quoteAsset] -= tradeAmount;
-        this.currentCexBalances[minExchange][baseAsset] += buyBaseAmount;
+        this.currentCexBalances[minExchange][baseAsset] += buyBaseAmount - deductedProfit;
 
         // Update maxExchange balances (sell)
         this.currentCexBalances[maxExchange][quoteAsset] += tradeAmount;
         this.currentCexBalances[maxExchange][baseAsset] -= sellBaseAmount;
 
         // Log successful arbitrage
-        const simulationResult =
-          `Successful arbitrage: ${symbol}: ` +
-          `Buy ${buyBaseAmount.toFixed(8)} ${baseAsset} at ${minPrice} on ${minExchange}, ` +
-          `Sell ${sellBaseAmount.toFixed(8)} ${baseAsset} at ${maxPrice} on ${maxExchange} (${diffPercentage.toFixed(4)}%)`;
+        const profitDetail =
+          `Arbitrage ${symbol}: ` +
+          `Gross profit: ${grossProfit.toFixed(8)} ${baseAsset}, ` +
+          `Diff %: ${diffPercentage.toFixed(4)}%, ` +
+          `Fee deduction: ${deductedProfit.toFixed(8)} ${baseAsset}, ` +
+          `Real profit: ${realProfit.toFixed(8)} ${baseAsset}`;
 
+        const simulationResult =
+          `Successful arbitrage: ${symbol} - ` +
+          `Buy ${buyBaseAmount.toFixed(8)} ${baseAsset} @ ${minPrice} on ${minExchange}, ` +
+          `Sell ${sellBaseAmount.toFixed(8)} ${baseAsset} @ ${maxPrice} on ${maxExchange} ` +
+          `(${diffPercentage.toFixed(4)}%)`;
+
+        results.profitDetails.push(profitDetail);
         results.simulationResults.push(simulationResult);
       });
       if (results.warnings.length > 0) {
         this.log.warn('Simulation warnings:', results.warnings);
       }
+
       results.totalBalances = this.calculateTotalBalances();
       this.log.debug('Result:', results);
       return results;
