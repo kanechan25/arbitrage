@@ -67,7 +67,12 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
         console.log(`___________Fetch count: ${CexArbService.fetchCount}`);
         if (results) {
           // Every item in results is a satisfied result => TODO: ARBITRAGE
-          await this.cexCommonService.simulationArbitrage(results);
+          const simulationResult = await this.cexCommonService.simulationArbitrage(results);
+          this.logger.log('__simulationResult: ', simulationResult);
+          if (simulationResult.warnings.length > 0) {
+            this.stopWatching();
+            return;
+          }
         }
         // const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS, true);
         // this.logger.log('__analysis: ', analysis);

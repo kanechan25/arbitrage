@@ -269,9 +269,9 @@ export class CexCommonService {
         // Calculate real profit
         const grossProfit = buyBaseAmount - sellBaseAmount;
         const configProfitPctDiff = this.configService.get('min_profit_percentage')[symbol];
-        const deductedProfit = grossProfit * (diffPercentage / configProfitPctDiff);
+        const deductedProfit = (grossProfit * configProfitPctDiff) / diffPercentage;
         const realProfit = grossProfit - deductedProfit;
-
+        console.log('__ simulationArbitrage: ', { grossProfit, configProfitPctDiff, deductedProfit, realProfit });
         // If we reach here, we have sufficient balances => proceed with the simulation
         // Update minExchange balances (buy)
         this.currentCexBalances[minExchange][quoteAsset] -= tradeAmount;
@@ -303,7 +303,6 @@ export class CexCommonService {
       }
 
       results.totalBalances = this.calculateTotalBalances();
-      this.log.debug('Result:', results);
       return results;
     } catch (error) {
       this.log.error('Error in simulationArbitrage:', error);
