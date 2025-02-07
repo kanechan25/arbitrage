@@ -17,7 +17,7 @@ function generateTradingPairs(config: TradingPairConfig): Record<string, number>
 
 export default () => ({
   symbol: USDT.SOL,
-  symbols: [USDT.PENGU, USDT.ARB, USDT.HBAR],
+  symbols: [USDT.PENGU],
   min_profit_percentage: generateTradingPairs({
     defaultValue: 0.2,
     customValues: {
@@ -60,6 +60,6 @@ export default () => ({
   min_usdt_price_diff: {
     'SOL/USDT': 0.05,
   },
-  fetch_delay_min: 5000,
-  fetch_delay_max: 8500,
+  fetch_delay_min: 3000,
+  fetch_delay_max: 4000,
 });

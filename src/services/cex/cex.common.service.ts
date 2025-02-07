@@ -219,6 +219,18 @@ export class CexCommonService {
       };
     }
   }
+  private calculateTotalBalances(): Record<string, number> {
+    const totalBalances: Record<string, number> = {};
+
+    Object.values(this.currentCexBalances).forEach((exchangeBalance) => {
+      // Sum up each token across all exchanges
+      Object.entries(exchangeBalance).forEach(([token, amount]) => {
+        totalBalances[token] = (totalBalances[token] || 0) + amount;
+      });
+    });
+
+    return totalBalances;
+  }
 
   async simulationArbitrage(satisfiedResults: IListenTicker[]): Promise<ISimulationResult> {
     const results: ISimulationResult = {
@@ -226,10 +238,11 @@ export class CexCommonService {
       data: this.currentCexBalances,
       simulationResults: [] as string[],
       warnings: [] as string[],
+      totalBalances: this.calculateTotalBalances(),
     };
     try {
       satisfiedResults.forEach((result) => {
-        const { symbol, minExchange, minPrice, maxExchange, maxPrice } = result;
+        const { symbol, minExchange, minPrice, maxExchange, maxPrice, diffPercentage } = result;
         const [baseAsset, quoteAsset] = symbol.split('/');
         const tradeAmount = 5; // Trading with 5 USDT
 
@@ -264,16 +277,15 @@ export class CexCommonService {
         const simulationResult =
           `Successful arbitrage: ${symbol}: ` +
           `Buy ${buyBaseAmount.toFixed(8)} ${baseAsset} at ${minPrice} on ${minExchange}, ` +
-          `Sell ${sellBaseAmount.toFixed(8)} ${baseAsset} at ${maxPrice} on ${maxExchange}`;
+          `Sell ${sellBaseAmount.toFixed(8)} ${baseAsset} at ${maxPrice} on ${maxExchange} (${diffPercentage.toFixed(4)}%)`;
 
         results.simulationResults.push(simulationResult);
-        this.log.debug(simulationResult);
-        this.log.debug('Updated balances:', this.currentCexBalances);
       });
       if (results.warnings.length > 0) {
         this.log.warn('Simulation warnings:', results.warnings);
       }
-
+      results.totalBalances = this.calculateTotalBalances();
+      this.log.debug('Result:', results);
       return results;
     } catch (error) {
       this.log.error('Error in simulationArbitrage:', error);
@@ -281,6 +293,7 @@ export class CexCommonService {
         success: false,
         error: error.message,
         data: this.currentCexBalances,
+        totalBalances: this.calculateTotalBalances(),
       };
     }
   }

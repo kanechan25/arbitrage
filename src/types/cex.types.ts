@@ -55,6 +55,7 @@ export interface IExchangeAnalysis {
 export interface ISimulationResult {
   success: boolean;
   data: Record<string, IWalletBalance>;
+  totalBalances: Record<string, number>;
   simulationResults?: string[];
   warnings?: string[];
   error?: string | null;
@@ -147,42 +148,3 @@ export const CHAIN_HTX = Object.freeze({
   SOL: 'SOL',
   TRON: 'TRC20',
 });
-
-const mockSimulation = {
-  binance: {
-    USDT: 1055,
-    PENGU: 8586.071591026492,
-    ARB: 1954.8812970936503,
-    HBAR: 9915.775354855561,
-  },
-  okx: {
-    USDT: 1045,
-    PENGU: 8105.628758876589,
-    ARB: 1977.441912925784,
-    HBAR: 9936.975593162273,
-  },
-  huobi: {
-    USDT: 865,
-    PENGU: 22881.67938931297,
-    ARB: 2000,
-    HBAR: 10000.018406797844,
-  },
-  mexc: {
-    USDT: 980,
-    PENGU: 11451.220704897112,
-    ARB: 1966.1501425385802,
-    HBAR: 10084.218634645136,
-  },
-  bitget: {
-    USDT: 1025,
-    PENGU: 46.81236889638353,
-    ARB: 2113.147823231857,
-    HBAR: 10127.249823330461,
-  },
-  bybit: {
-    USDT: 1030,
-    PENGU: 9061.644921777483,
-    ARB: 1988.7184115523467,
-    HBAR: 9936.857750971163,
-  },
-};
