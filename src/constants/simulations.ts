@@ -38,3 +38,10 @@ export const mockCexBalances: Record<string, IWalletBalance> = {
     HBAR: 10000,
   },
 };
+
+const total = {
+  USDT: 7700,
+  PENGU: 360000,
+  ARB: 12000,
+  HBAR: 60000,
+};
