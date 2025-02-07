@@ -9,6 +9,7 @@ import { BybitService } from '@/services/cex/bybit/bybit.service';
 import { OkxService } from '@/services/cex/okx/okx.service';
 import { MexcService } from '@/services/cex/mexc/mexc.service';
 import { HuobiService } from '@/services/cex/huobi/huobi.service';
+import { CexCommonService } from '@/services/cex/cex.common.service';
 // import { LOG_PATHS } from '@/constants/logs';
 
 @Injectable()
@@ -25,6 +26,7 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
     private bitgetService: BitgetService,
     private bybitService: BybitService,
     private huobiService: HuobiService,
+    private cexCommonService: CexCommonService,
     private configService: ConfigService,
     private pricesService: PricesService,
   ) {
@@ -56,22 +58,23 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
 
   async startWatching() {
     this.isWatching = true;
-    // const symbol: string = this.configService.get('symbol');
     // const [base, quote] = symbol.split('/');
-
-    // const symbols: string[] = this.configService.get('symbols');
+    const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        // await this.pricesService.fetch_findOp_log_Tickers(this.exchanges, symbols, true);
-        // CexArbService.fetchCount++;
-        // console.log(`___________Fetch count: ${CexArbService.fetchCount}`);
-        // this.logger.log('__justFindOutTickersOptnt: ', results);
+        const results = await this.pricesService.fetch_findOp_log_Tickers(this.exchanges, symbols, false);
+        CexArbService.fetchCount++;
+        console.log(`___________Fetch count: ${CexArbService.fetchCount}`);
+        if (results) {
+          // Every item in results is a satisfied result => TODO: ARBITRAGE
+          await this.cexCommonService.simulationArbitrage(results);
+        }
         // const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS, true);
         // this.logger.log('__analysis: ', analysis);
-        const result = await this.binanceService.fetchBalance(['USDT']);
-        this.logger.log('__result: ', result);
-        this.stopWatching();
-        // await this.pricesService.delay();
+        // const result = await this.mexcService.fetchBalance(['PENGU'], 'spot');
+        // this.logger.log('__result: ', result);
+        // this.stopWatching();
+        await this.pricesService.delay();
       }
     } catch (error) {
       this.logger.error('Error in price watching loop:', error);

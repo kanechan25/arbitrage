@@ -2,15 +2,26 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PricesService } from './prices.service';
 import * as ccxt from 'ccxt';
-import { ICurrencyInterface, WalletType, WithdrawParams } from '@/types/cex.types';
+import {
+  ICurrencyInterface,
+  IListenTicker,
+  ISimulationResult,
+  IWalletBalance,
+  WalletType,
+  WithdrawParams,
+} from '@/types/cex.types';
+import { mockCexBalances } from '@/constants/simulations';
 @Injectable()
 export class CexCommonService {
   private readonly log = new Logger(CexCommonService.name);
+  private currentCexBalances: Record<string, IWalletBalance>;
 
   constructor(
     private pricesService: PricesService,
     private configService: ConfigService,
-  ) {}
+  ) {
+    this.currentCexBalances = JSON.parse(JSON.stringify(mockCexBalances));
+  }
 
   async fetchCexBalance(exchange: ccxt.Exchange, symbol?: string[], type: WalletType = 'spot') {
     try {
@@ -205,6 +216,71 @@ export class CexCommonService {
       return {
         success: false,
         error: errorMessage,
+      };
+    }
+  }
+
+  async simulationArbitrage(satisfiedResults: IListenTicker[]): Promise<ISimulationResult> {
+    const results: ISimulationResult = {
+      success: true,
+      data: this.currentCexBalances,
+      simulationResults: [] as string[],
+      warnings: [] as string[],
+    };
+    try {
+      satisfiedResults.forEach((result) => {
+        const { symbol, minExchange, minPrice, maxExchange, maxPrice } = result;
+        const [baseAsset, quoteAsset] = symbol.split('/');
+        const tradeAmount = 5; // Trading with 5 USDT
+
+        // Validate buy side balances (minExchange)
+        if (this.currentCexBalances[minExchange][quoteAsset] < tradeAmount) {
+          results.warnings.push(
+            `Insufficient ${quoteAsset} balance (${this.currentCexBalances[minExchange][quoteAsset]}) in ${minExchange} for buying. Required: ${tradeAmount}`,
+          );
+          return;
+        }
+        // Calculate buy/sell amounts
+        const buyBaseAmount = tradeAmount / minPrice;
+        const sellBaseAmount = tradeAmount / maxPrice;
+
+        // Validate sell side balances (maxExchange)
+        if (this.currentCexBalances[maxExchange][baseAsset] < sellBaseAmount) {
+          results.warnings.push(
+            `Insufficient ${baseAsset} balance (${this.currentCexBalances[maxExchange][baseAsset]}) in ${maxExchange} for selling. Required: ${sellBaseAmount}`,
+          );
+          return;
+        }
+        // If we reach here, we have sufficient balances => proceed with the simulation
+        // Update minExchange balances (buy)
+        this.currentCexBalances[minExchange][quoteAsset] -= tradeAmount;
+        this.currentCexBalances[minExchange][baseAsset] += buyBaseAmount;
+
+        // Update maxExchange balances (sell)
+        this.currentCexBalances[maxExchange][quoteAsset] += tradeAmount;
+        this.currentCexBalances[maxExchange][baseAsset] -= sellBaseAmount;
+
+        // Log successful arbitrage
+        const simulationResult =
+          `Successful arbitrage: ${symbol}: ` +
+          `Buy ${buyBaseAmount.toFixed(8)} ${baseAsset} at ${minPrice} on ${minExchange}, ` +
+          `Sell ${sellBaseAmount.toFixed(8)} ${baseAsset} at ${maxPrice} on ${maxExchange}`;
+
+        results.simulationResults.push(simulationResult);
+        this.log.debug(simulationResult);
+        this.log.debug('Updated balances:', this.currentCexBalances);
+      });
+      if (results.warnings.length > 0) {
+        this.log.warn('Simulation warnings:', results.warnings);
+      }
+
+      return results;
+    } catch (error) {
+      this.log.error('Error in simulationArbitrage:', error);
+      return {
+        success: false,
+        error: error.message,
+        data: this.currentCexBalances,
       };
     }
   }
