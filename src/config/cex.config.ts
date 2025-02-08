@@ -2,7 +2,7 @@ import { CEX } from '@/types/cex.types';
 import { USDT } from '@/config/tokens';
 
 export default () => ({
-  symbols: [USDT.PENGU, USDT.WLD, USDT.PNUT, USDT.WIF, USDT.TIA, USDT.TRUMP, USDT.APT, USDT.ARB],
+  symbols: [USDT.PENGU],
   exchanges: [
     {
       name: CEX.BINANCE,

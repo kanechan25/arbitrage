@@ -62,18 +62,18 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
     const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        await this.pricesService.fetch_findOp_log_Tickers(this.exchanges, symbols, false);
+        const results = await this.pricesService.fetch_findOp_log_Tickers(this.exchanges, symbols, 'use-native', false);
         CexArbService.fetchCount++;
         console.log(`___________Fetch count: ${CexArbService.fetchCount}`);
-        // if (results) {
-        //   // Every item in results is a satisfied result => TODO: ARBITRAGE
-        //   const simulationResult = await this.cexCommonService.simulationArbitrage(results, 'use-deducted');
-        //   this.logger.log('__simulationResult: ', simulationResult);
-        //   if (simulationResult.warnings.length > 0) {
-        //     this.stopWatching();
-        //     return;
-        //   }
-        // }
+        if (results) {
+          // Every item in results is a satisfied result => TODO: ARBITRAGE
+          const simulationResult = await this.cexCommonService.simulationArbitrage(results, 'use-native');
+          this.logger.log('__simulationResult: ', simulationResult);
+          if (simulationResult.warnings.length > 0) {
+            this.stopWatching();
+            return;
+          }
+        }
         // const result = await this.mexcService.fetchBalance(['PENGU'], 'spot');
         // this.logger.log('__result: ', result);
         // this.stopWatching();

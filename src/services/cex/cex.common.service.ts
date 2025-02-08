@@ -12,7 +12,6 @@ import {
   WithdrawParams,
 } from '@/types/cex.types';
 import { mockCexBalances } from '@/constants/simulations';
-import { calculateSpotFees } from '@/utils';
 @Injectable()
 export class CexCommonService {
   private readonly log = new Logger(CexCommonService.name);
@@ -249,9 +248,19 @@ export class CexCommonService {
     };
     try {
       satisfiedResults.forEach((result) => {
-        const { symbol, minExchange, minPrice, maxExchange, maxPrice, diffPercentage } = result;
+        const {
+          symbol,
+          minExchange,
+          minPrice,
+          maxExchange,
+          maxPrice,
+          diffPercentage,
+          totalFeePct,
+          minExFeePct,
+          maxExFeePct,
+        } = result;
         const [baseAsset, quoteAsset] = symbol.split('/');
-        const tradeAmount = this.configService.get('usdt_amount'); // Trading with 5 USDT
+        const tradeAmount = this.configService.get('usdt_amount');
 
         // Validate buy side balances (minExchange)
         if (this.currentCexBalances[minExchange][quoteAsset] < tradeAmount) {
@@ -271,48 +280,67 @@ export class CexCommonService {
           );
           return;
         }
+        const grossProfit = buyBaseAmount - sellBaseAmount;
+        console.log('__ log calculation: ', { buyBaseAmount, sellBaseAmount, totalFeePct, minExFeePct, maxExFeePct });
+        if (simulationType === 'use-native') {
+          // Calculate actual fees in quote asset (e.g., USDT)
+          const buyFeeInQuote = tradeAmount * (minExFeePct / 100);
+          const sellFeeInQuote = tradeAmount * (maxExFeePct / 100);
 
-        switch (simulationType) {
-          case 'use-native':
-            break;
-          case 'use-deducted':
-            // Calculate real profit
-            const grossProfit = buyBaseAmount - sellBaseAmount;
-            const { totalFeePct } = calculateSpotFees({
-              minExchange,
-              maxExchange,
-              spotFeeType: 'discounted',
-              symbol,
-            });
-            const deductedProfit = (grossProfit * totalFeePct) / diffPercentage;
-            const realProfit = grossProfit - deductedProfit;
-            console.log('__ simulationArbitrage: ', { grossProfit, totalFeePct, deductedProfit, realProfit });
-            // If we reach here, we have sufficient balances => proceed with the simulation
-            // Update minExchange balances (buy)
-            this.currentCexBalances[minExchange][quoteAsset] -= tradeAmount;
-            this.currentCexBalances[minExchange][baseAsset] += buyBaseAmount - deductedProfit;
+          // Update minExchange balances (buy)
+          this.currentCexBalances[minExchange][quoteAsset] -= tradeAmount;
+          this.currentCexBalances[minExchange][baseAsset] += buyBaseAmount;
 
-            // Update maxExchange balances (sell)
-            this.currentCexBalances[maxExchange][quoteAsset] += tradeAmount;
-            this.currentCexBalances[maxExchange][baseAsset] -= sellBaseAmount;
+          // Update maxExchange balances (sell)
+          this.currentCexBalances[maxExchange][quoteAsset] += tradeAmount;
+          this.currentCexBalances[maxExchange][baseAsset] -= sellBaseAmount;
 
-            // Log successful arbitrage
-            const profitDetail =
-              `Arbitrage ${symbol}: ` +
-              `Gross profit: ${grossProfit.toFixed(8)} ${baseAsset}, ` +
-              `Diff %: ${diffPercentage.toFixed(4)}%, ` +
-              `Fee deduction: ${deductedProfit.toFixed(8)} ${baseAsset}, ` +
-              `Real profit: ${realProfit.toFixed(8)} ${baseAsset}`;
+          const profitDetail =
+            `Arbitrage ${symbol}: ` +
+            `Gross profit: ${grossProfit.toFixed(8)} ${baseAsset} (${(grossProfit * minPrice).toFixed(8)} ${quoteAsset}), ` +
+            `Net profit in Quote Asset: ${grossProfit * minPrice - (buyFeeInQuote + sellFeeInQuote)} ${quoteAsset}, ` +
+            `Total fees in Quote Asset: ${buyFeeInQuote + sellFeeInQuote} ${quoteAsset}, ` +
+            `Total fees %: ${totalFeePct.toFixed(4)}%, ` +
+            `Diff %: ${diffPercentage.toFixed(4)}%`;
 
-            const simulationResult =
-              `Successful arbitrage: ${symbol} - ` +
-              `Buy ${buyBaseAmount.toFixed(8)} ${baseAsset} @ ${minPrice} on ${minExchange}, ` +
-              `Sell ${sellBaseAmount.toFixed(8)} ${baseAsset} @ ${maxPrice} on ${maxExchange} ` +
-              `(${diffPercentage.toFixed(4)}%)`;
+          const simulationResult =
+            `Successful arbitrage: ${symbol}: ` +
+            `Buy ${buyBaseAmount.toFixed(8)} ${baseAsset} at ${minPrice} ${quoteAsset} on ${minExchange}, ` +
+            `Sell ${sellBaseAmount.toFixed(8)} ${baseAsset} at ${maxPrice} ${quoteAsset} on ${maxExchange} `;
 
-            results.profitDetails.push(profitDetail);
-            results.simulationResults.push(simulationResult);
-            break;
+          results.profitDetails.push(profitDetail);
+          results.simulationResults.push(simulationResult);
+        } else if (simulationType === 'use-deducted') {
+          // We will get less quote asset due to deducted fees
+          const actualBuyBaseAmount = buyBaseAmount * (1 - minExFeePct / 100);
+          const actualSellQuoteAmount = sellBaseAmount * (1 - maxExFeePct / 100) * maxPrice;
+          console.log('__ actualBuyBaseAmount: ', actualBuyBaseAmount);
+          console.log('__ actualSellBaseAmount: ', sellBaseAmount * (1 - maxExFeePct / 100));
+          console.log('__ actualSellQuoteAmount: ', actualSellQuoteAmount);
+
+          // Update minExchange balances (buy)
+          this.currentCexBalances[minExchange][quoteAsset] -= tradeAmount;
+          this.currentCexBalances[minExchange][baseAsset] += actualBuyBaseAmount;
+
+          // Update maxExchange balances (sell)
+          this.currentCexBalances[maxExchange][baseAsset] -= sellBaseAmount;
+          this.currentCexBalances[maxExchange][quoteAsset] += actualSellQuoteAmount;
+
+          const profitDetail =
+            `Arbitrage ${symbol}: ` +
+            `Gross profit: ${grossProfit.toFixed(8)} ${baseAsset}, ` +
+            `Fees impact baseAsset: ${(buyBaseAmount - actualBuyBaseAmount).toFixed(8)} ${baseAsset}, ` +
+            `Fees impact quoteAsset: ${(tradeAmount - actualSellQuoteAmount).toFixed(8)} ${quoteAsset}, ` +
+            `Diff %: ${diffPercentage.toFixed(4)}%, ` +
+            `Total exchange fee %: ${totalFeePct.toFixed(4)}%`;
+
+          const simulationResult =
+            `Successful arbitrage: ${symbol}: ` +
+            `Buy ${buyBaseAmount.toFixed(8)} ${baseAsset} at ${minPrice} on ${minExchange}, ` +
+            `Sell ${sellBaseAmount.toFixed(8)} ${baseAsset} at ${maxPrice} on ${maxExchange} `;
+
+          results.profitDetails.push(profitDetail);
+          results.simulationResults.push(simulationResult);
         }
       });
 

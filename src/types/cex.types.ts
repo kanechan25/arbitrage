@@ -31,6 +31,8 @@ export interface IListenTicker {
   priceDiff: number;
   diffPercentage: number;
   totalFeePct: number;
+  minExFeePct: number;
+  maxExFeePct: number;
   [key: string]: string | number;
 }
 
@@ -92,7 +94,7 @@ export interface ICalculateSpotFees {
   symbol: string;
   minExchange: string;
   maxExchange: string;
-  spotFeeType: 'default' | 'discounted';
+  spotFeeType: 'default' | 'discounted'; // 'use-native' will be 'discounted', if 'use-deducted' will be 'default'
 }
 export interface ISpotFees {
   default: number;

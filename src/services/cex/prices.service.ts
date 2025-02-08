@@ -2,7 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as ccxt from 'ccxt';
 import { LoggerService } from '@/services/_logger.service';
-import { IListenTicker, IMultiTickers, ITicker, ITickerRecords, IExchangeAnalysis } from '@/types/cex.types';
+import {
+  IListenTicker,
+  IMultiTickers,
+  ITicker,
+  ITickerRecords,
+  IExchangeAnalysis,
+  SimulationType,
+} from '@/types/cex.types';
 import { analyzeExchangeLog } from '@/services/_exchangeStats';
 import { calculateSpotFees } from '@/utils';
 @Injectable()
@@ -24,6 +31,7 @@ export class PricesService {
   async fetch_findOp_log_Tickers(
     exchanges: Map<string, ccxt.Exchange>,
     symbols: string[],
+    simulationType: SimulationType,
     isLogger: boolean,
   ): Promise<IListenTicker[] | null> {
     const tickerPromises = Array.from(exchanges.entries()).map(
@@ -58,17 +66,18 @@ export class PricesService {
         last: result.tickers[symbol].last,
       })),
     }));
-    return await this.findOp_log_tickers(validResults, isLogger);
+    return await this.findOp_log_tickers(validResults, simulationType, isLogger);
   }
 
   private async findOp_log_tickers(
     fetchPriceResults: ITickerRecords[],
+    simulationType: SimulationType,
     isLogger: boolean = false,
   ): Promise<IListenTicker[] | null> {
     if (fetchPriceResults.length > 0) {
       const results = fetchPriceResults
         .map((validResult) => {
-          return Object.values(validResult).map((results) => this.analyzePrices(results, isLogger))[0];
+          return Object.values(validResult).map((results) => this.analyzePrices(results, simulationType, isLogger))[0];
         })
         .filter((result): result is IListenTicker => result !== null);
       return results.length > 0 ? results : null;
@@ -80,7 +89,11 @@ export class PricesService {
 
   // fetchSingleTicker deprecated 25 Jan 2025, deleted 30 Jan 2025
 
-  private analyzePrices(results: ITicker[], isLogger: boolean = false): IListenTicker | null {
+  private analyzePrices(
+    results: ITicker[],
+    simulationType: SimulationType,
+    isLogger: boolean = false,
+  ): IListenTicker | null {
     const priceEntries = results
       .filter((result) => result.ticker?.last)
       .map((result) => ({
@@ -120,10 +133,10 @@ export class PricesService {
         {},
       );
       // If the price difference is greater than the configured minimum profit percentage, return the opportunity
-      const { totalFeePct } = calculateSpotFees({
+      const { totalFeePct, minExFeePct, maxExFeePct } = calculateSpotFees({
         minExchange,
         maxExchange,
-        spotFeeType: 'discounted',
+        spotFeeType: simulationType === 'use-native' ? 'discounted' : 'default',
         symbol,
       });
       if (isLogger) {
@@ -136,12 +149,13 @@ export class PricesService {
           priceDiff,
           diffPercentage: Number(diffPercentage.toFixed(4)),
           totalFeePct,
+          minExFeePct,
+          maxExFeePct,
           ...exchangePrices,
         });
       }
 
       if (diffPercentage > totalFeePct) {
-        // this.logger.logInfo(`____FOUND out an opportunity: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
         return {
           symbol,
           minExchange,
@@ -151,10 +165,11 @@ export class PricesService {
           priceDiff,
           diffPercentage,
           totalFeePct,
+          minExFeePct,
+          maxExFeePct,
           ...exchangePrices,
         };
       } else {
-        // this.logger.logInfo(`_______NO opportunity found: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
         return null;
       }
     } else {

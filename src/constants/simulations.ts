@@ -14,13 +14,13 @@ export const mockCexBalances: Record<string, IWalletBalance> = {
     HBAR: 10000,
   },
   [CEX.HUOBI]: {
-    USDT: 1500,
+    USDT: 1000,
     PENGU: 100000,
     ARB: 2000,
     HBAR: 10000,
   },
   [CEX.MEXC]: {
-    USDT: 1200,
+    USDT: 1000,
     PENGU: 100000,
     ARB: 2000,
     HBAR: 10000,
@@ -37,11 +37,4 @@ export const mockCexBalances: Record<string, IWalletBalance> = {
     ARB: 2000,
     HBAR: 10000,
   },
-};
-
-export const totalBalances = {
-  USDT: 7700,
-  PENGU: 360000,
-  ARB: 12000,
-  HBAR: 60000,
 };
