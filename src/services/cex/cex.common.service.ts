@@ -22,7 +22,6 @@ export class CexCommonService {
     private configService: ConfigService,
   ) {
     this.currentCexBalances = JSON.parse(JSON.stringify(mockCexBalances));
-    this.log.debug('Initial balances:', this.calculateTotalBalances());
   }
 
   async fetchCexBalance(exchange: ccxt.Exchange, symbol?: string[], type: WalletType = 'spot') {

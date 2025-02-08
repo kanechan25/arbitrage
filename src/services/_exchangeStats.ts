@@ -38,7 +38,16 @@ export async function analyzeExchangeLog(logFilePath: string): Promise<IExchange
         from: new Date(0),
         until: new Date(),
         order: 'asc',
-        fields: ['maxExchange', 'minExchange', 'diffPercentage', 'timestamp', 'symbol'],
+        fields: [
+          'maxExchange',
+          'minExchange',
+          'diffPercentage',
+          'timestamp',
+          'symbol',
+          'totalFeePct',
+          'minExFeePct',
+          'maxExFeePct',
+        ],
       },
       (err, results) => {
         if (err) {
