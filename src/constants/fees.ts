@@ -14,13 +14,13 @@ export const spotFees: Record<string, ISpotFees> = {
     default: 0.05,
     discounted: 0.025,
     customValues: {
-      [USDT.ARB]: 0,
-      [USDT.WLD]: 0,
-      [USDT.PNUT]: 0,
-      [USDT.WIF]: 0,
       [USDT.APT]: 0,
+      [USDT.ARB]: 0,
+      [USDT.PNUT]: 0,
       [USDT.TIA]: 0,
       [USDT.TRUMP]: 0,
+      [USDT.WIF]: 0,
+      [USDT.WLD]: 0,
     },
   },
   [CEX.BITGET]: {
