@@ -1,12 +1,8 @@
 import { CEX, IExchangeAnalysis, IListenTicker } from '@/types/cex.types';
 import { createLogger, transports, format } from 'winston';
-import { ConfigService } from '@nestjs/config';
 import { calculateAverageTime, calculateTimeDifference } from '@/utils';
 
-export async function analyzeExchangeLog(
-  logFilePath: string,
-  configService: ConfigService,
-): Promise<IExchangeAnalysis> {
+export async function analyzeExchangeLog(logFilePath: string): Promise<IExchangeAnalysis> {
   // Create a Winston logger instance
   const logger = createLogger({
     transports: [
@@ -50,8 +46,7 @@ export async function analyzeExchangeLog(
           return;
         }
         const logEntries = results.file || [];
-        result.symbol = logEntries[logEntries.length - 1]?.symbol;
-        const configProfitPctDiff = configService.get('min_profit_percentage')[result.symbol];
+        result.symbol = logEntries[0]?.symbol;
 
         for (const entry of logEntries) {
           try {
@@ -66,7 +61,7 @@ export async function analyzeExchangeLog(
             }
 
             if (data && data?.maxExchange && data?.minExchange) {
-              if (data.diffPercentage && data.diffPercentage > configProfitPctDiff) {
+              if (data.diffPercentage && data.diffPercentage > data.totalFeePct) {
                 result.satisfiedPctCount++;
                 result.satisfiedProfitPctAvg += data.diffPercentage;
               }

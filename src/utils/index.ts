@@ -1,3 +1,6 @@
+import { spotFees } from '@/constants/fees';
+import { CEX, ICalculateSpotFees } from '@/types/cex.types';
+
 export function calculateTimeDifference(endTime: string, startTime: string): string {
   const end = new Date(endTime);
   const start = new Date(startTime);
@@ -30,4 +33,16 @@ export function calculateAverageTime(satisfiedCount: number, duration: string): 
   const formatNumber = (num: number, digits: number = 2): string => num.toString().padStart(digits, '0');
 
   return `${formatNumber(hours_part)}:${formatNumber(minutes_part)}:${formatNumber(seconds_part)}.${formatNumber(milliseconds_part, 3)}`;
+}
+
+export function calculateSpotFees(params: ICalculateSpotFees): {
+  totalFeePct: number;
+  minExFeePct: number;
+  maxExFeePct: number;
+} {
+  const { minExchange, maxExchange, spotFeeType, symbol } = params;
+  const symbolMexcFeePct = spotFees[CEX.MEXC].customValues[symbol] ?? spotFees[CEX.MEXC][spotFeeType];
+  const minExFeePct = minExchange === CEX.MEXC ? symbolMexcFeePct : spotFees[minExchange][spotFeeType];
+  const maxExFeePct = maxExchange === CEX.MEXC ? symbolMexcFeePct : spotFees[maxExchange][spotFeeType];
+  return { totalFeePct: minExFeePct + maxExFeePct, minExFeePct, maxExFeePct };
 }

@@ -1,6 +1,7 @@
 import * as ccxt from 'ccxt';
 
 export type WalletType = 'spot' | 'funding';
+export type SimulationType = 'use-native' | 'use-deducted';
 export interface ITicker {
   exchange: string;
   ticker: ccxt.Ticker;
@@ -29,6 +30,7 @@ export interface IListenTicker {
   maxPrice: number;
   priceDiff: number;
   diffPercentage: number;
+  totalFeePct: number;
   [key: string]: string | number;
 }
 
@@ -86,7 +88,17 @@ export interface ICurrencyInterface extends ccxt.CurrencyInterface {
     [key: string]: number;
   };
 }
-
+export interface ICalculateSpotFees {
+  symbol: string;
+  minExchange: string;
+  maxExchange: string;
+  spotFeeType: 'default' | 'discounted';
+}
+export interface ISpotFees {
+  default: number;
+  discounted: number;
+  customValues?: Record<string, number>;
+}
 export const CHAIN_BN = Object.freeze({
   APTOS: 'APT',
   ARBITRUM: 'ARBITRUM',

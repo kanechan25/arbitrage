@@ -7,10 +7,12 @@ import {
   IListenTicker,
   ISimulationResult,
   IWalletBalance,
+  SimulationType,
   WalletType,
   WithdrawParams,
 } from '@/types/cex.types';
 import { mockCexBalances } from '@/constants/simulations';
+import { calculateSpotFees } from '@/utils';
 @Injectable()
 export class CexCommonService {
   private readonly log = new Logger(CexCommonService.name);
@@ -233,7 +235,10 @@ export class CexCommonService {
     return totalBalances;
   }
 
-  async simulationArbitrage(satisfiedResults: IListenTicker[]): Promise<ISimulationResult> {
+  async simulationArbitrage(
+    satisfiedResults: IListenTicker[],
+    simulationType: SimulationType,
+  ): Promise<ISimulationResult> {
     const results: ISimulationResult = {
       success: true,
       data: this.currentCexBalances,
@@ -246,7 +251,7 @@ export class CexCommonService {
       satisfiedResults.forEach((result) => {
         const { symbol, minExchange, minPrice, maxExchange, maxPrice, diffPercentage } = result;
         const [baseAsset, quoteAsset] = symbol.split('/');
-        const tradeAmount = 5; // Trading with 5 USDT
+        const tradeAmount = this.configService.get('usdt_amount'); // Trading with 5 USDT
 
         // Validate buy side balances (minExchange)
         if (this.currentCexBalances[minExchange][quoteAsset] < tradeAmount) {
@@ -266,38 +271,51 @@ export class CexCommonService {
           );
           return;
         }
-        // Calculate real profit
-        const grossProfit = buyBaseAmount - sellBaseAmount;
-        const configProfitPctDiff = this.configService.get('min_profit_percentage')[symbol];
-        const deductedProfit = (grossProfit * configProfitPctDiff) / diffPercentage;
-        const realProfit = grossProfit - deductedProfit;
-        console.log('__ simulationArbitrage: ', { grossProfit, configProfitPctDiff, deductedProfit, realProfit });
-        // If we reach here, we have sufficient balances => proceed with the simulation
-        // Update minExchange balances (buy)
-        this.currentCexBalances[minExchange][quoteAsset] -= tradeAmount;
-        this.currentCexBalances[minExchange][baseAsset] += buyBaseAmount - deductedProfit;
 
-        // Update maxExchange balances (sell)
-        this.currentCexBalances[maxExchange][quoteAsset] += tradeAmount;
-        this.currentCexBalances[maxExchange][baseAsset] -= sellBaseAmount;
+        switch (simulationType) {
+          case 'use-native':
+            break;
+          case 'use-deducted':
+            // Calculate real profit
+            const grossProfit = buyBaseAmount - sellBaseAmount;
+            const { totalFeePct } = calculateSpotFees({
+              minExchange,
+              maxExchange,
+              spotFeeType: 'discounted',
+              symbol,
+            });
+            const deductedProfit = (grossProfit * totalFeePct) / diffPercentage;
+            const realProfit = grossProfit - deductedProfit;
+            console.log('__ simulationArbitrage: ', { grossProfit, totalFeePct, deductedProfit, realProfit });
+            // If we reach here, we have sufficient balances => proceed with the simulation
+            // Update minExchange balances (buy)
+            this.currentCexBalances[minExchange][quoteAsset] -= tradeAmount;
+            this.currentCexBalances[minExchange][baseAsset] += buyBaseAmount - deductedProfit;
 
-        // Log successful arbitrage
-        const profitDetail =
-          `Arbitrage ${symbol}: ` +
-          `Gross profit: ${grossProfit.toFixed(8)} ${baseAsset}, ` +
-          `Diff %: ${diffPercentage.toFixed(4)}%, ` +
-          `Fee deduction: ${deductedProfit.toFixed(8)} ${baseAsset}, ` +
-          `Real profit: ${realProfit.toFixed(8)} ${baseAsset}`;
+            // Update maxExchange balances (sell)
+            this.currentCexBalances[maxExchange][quoteAsset] += tradeAmount;
+            this.currentCexBalances[maxExchange][baseAsset] -= sellBaseAmount;
 
-        const simulationResult =
-          `Successful arbitrage: ${symbol} - ` +
-          `Buy ${buyBaseAmount.toFixed(8)} ${baseAsset} @ ${minPrice} on ${minExchange}, ` +
-          `Sell ${sellBaseAmount.toFixed(8)} ${baseAsset} @ ${maxPrice} on ${maxExchange} ` +
-          `(${diffPercentage.toFixed(4)}%)`;
+            // Log successful arbitrage
+            const profitDetail =
+              `Arbitrage ${symbol}: ` +
+              `Gross profit: ${grossProfit.toFixed(8)} ${baseAsset}, ` +
+              `Diff %: ${diffPercentage.toFixed(4)}%, ` +
+              `Fee deduction: ${deductedProfit.toFixed(8)} ${baseAsset}, ` +
+              `Real profit: ${realProfit.toFixed(8)} ${baseAsset}`;
 
-        results.profitDetails.push(profitDetail);
-        results.simulationResults.push(simulationResult);
+            const simulationResult =
+              `Successful arbitrage: ${symbol} - ` +
+              `Buy ${buyBaseAmount.toFixed(8)} ${baseAsset} @ ${minPrice} on ${minExchange}, ` +
+              `Sell ${sellBaseAmount.toFixed(8)} ${baseAsset} @ ${maxPrice} on ${maxExchange} ` +
+              `(${diffPercentage.toFixed(4)}%)`;
+
+            results.profitDetails.push(profitDetail);
+            results.simulationResults.push(simulationResult);
+            break;
+        }
       });
+
       if (results.warnings.length > 0) {
         this.log.warn('Simulation warnings:', results.warnings);
       }
