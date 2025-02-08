@@ -4,6 +4,7 @@ import * as ccxt from 'ccxt';
 import { LoggerService } from '@/services/_logger.service';
 import { IListenTicker, IMultiTickers, ITicker, ITickerRecords, IExchangeAnalysis } from '@/types/cex.types';
 import { analyzeExchangeLog } from '@/services/_exchangeStats';
+import { calculateSpotFees } from '@/utils';
 @Injectable()
 export class PricesService {
   private recentTicks: ITicker[] = [];
@@ -108,9 +109,9 @@ export class PricesService {
       const priceDiff = maxPrice - minPrice;
       const diffPercentage = (priceDiff / minPrice) * 100;
 
-      this.logger.logInfo(
-        ` ${symbol}: Min: ${minPrice} (${minExchange}) | Max: ${maxPrice} (${maxExchange}) | % Diff: ${diffPercentage.toFixed(4)}%`,
-      );
+      // this.logger.logInfo(
+      //   ` ${symbol}: Min: ${minPrice} (${minExchange}) | Max: ${maxPrice} (${maxExchange}) | % Diff: ${diffPercentage.toFixed(4)}%`,
+      // );
       const exchangePrices = priceEntries.reduce(
         (acc, entry) => ({
           ...acc,
@@ -118,6 +119,13 @@ export class PricesService {
         }),
         {},
       );
+      // If the price difference is greater than the configured minimum profit percentage, return the opportunity
+      const { totalFeePct } = calculateSpotFees({
+        minExchange,
+        maxExchange,
+        spotFeeType: 'discounted',
+        symbol,
+      });
       if (isLogger) {
         this.logger.logPrices({
           symbol,
@@ -127,12 +135,12 @@ export class PricesService {
           maxExchange,
           priceDiff,
           diffPercentage: Number(diffPercentage.toFixed(4)),
+          totalFeePct,
           ...exchangePrices,
         });
       }
-      // If the price difference is greater than the configured minimum profit percentage, return the opportunity
-      const configProfitPctDiff = this.configService.get('min_profit_percentage')[symbol];
-      if (diffPercentage > configProfitPctDiff) {
+
+      if (diffPercentage > totalFeePct) {
         // this.logger.logInfo(`____FOUND out an opportunity: ${priceDiff} (${diffPercentage.toFixed(4)}%)`);
         return {
           symbol,
@@ -142,6 +150,7 @@ export class PricesService {
           maxPrice,
           priceDiff,
           diffPercentage,
+          totalFeePct,
           ...exchangePrices,
         };
       } else {
@@ -168,7 +177,7 @@ export class PricesService {
   }
   async analyzeExchangeLog(logFilePaths: string[], isCheckExchange: boolean = false): Promise<IExchangeAnalysis[]> {
     const analysisPromises = logFilePaths.map(async (logFilePath) => {
-      const analysis = await analyzeExchangeLog(logFilePath, this.configService);
+      const analysis = await analyzeExchangeLog(logFilePath);
       if (isCheckExchange) {
         return analysis;
       }

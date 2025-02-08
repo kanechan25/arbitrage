@@ -2,15 +2,29 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PricesService } from './prices.service';
 import * as ccxt from 'ccxt';
-import { ICurrencyInterface, WalletType, WithdrawParams } from '@/types/cex.types';
+import {
+  ICurrencyInterface,
+  IListenTicker,
+  ISimulationResult,
+  IWalletBalance,
+  SimulationType,
+  WalletType,
+  WithdrawParams,
+} from '@/types/cex.types';
+import { mockCexBalances } from '@/constants/simulations';
+import { calculateSpotFees } from '@/utils';
 @Injectable()
 export class CexCommonService {
   private readonly log = new Logger(CexCommonService.name);
+  private currentCexBalances: Record<string, IWalletBalance>;
 
   constructor(
     private pricesService: PricesService,
     private configService: ConfigService,
-  ) {}
+  ) {
+    this.currentCexBalances = JSON.parse(JSON.stringify(mockCexBalances));
+    this.log.debug('Initial balances:', this.calculateTotalBalances());
+  }
 
   async fetchCexBalance(exchange: ccxt.Exchange, symbol?: string[], type: WalletType = 'spot') {
     try {
@@ -142,7 +156,7 @@ export class CexCommonService {
       console.log('__ spotQuoteToBase: ', { watchedBasePrice, currentPrice, baseAmount, notionalValue });
 
       let order: any;
-      if (exchange.id === 'bitget') {
+      if (exchange.id === 'bitget' || exchange.id === 'huobi') {
         order = await exchange.createOrder(symbol, 'market', 'buy', undefined, undefined, {
           cost: quoteAmount,
         });
@@ -164,6 +178,157 @@ export class CexCommonService {
       return {
         success: false,
         error: errorMessage,
+      };
+    }
+  }
+
+  async orderBaseToQuote(exchange: ccxt.Exchange, symbol: string, baseAmount: number, watchedBasePrice?: number) {
+    try {
+      // symbol: DOGE/USDT, baseAmount: 10.12 DOGE
+      const markets = await exchange.loadMarkets();
+      const market = markets[symbol];
+
+      const ticker = await exchange.fetchTicker(symbol);
+      const currentPrice = ticker.last;
+
+      const notionalValue = baseAmount * currentPrice;
+      if (notionalValue < market.limits.cost.min) {
+        throw new Error(
+          `Order value (${notionalValue} USDT) is below minimum notional value of ${market.limits.cost.min} USDT`,
+        );
+      }
+      console.log('__ spotBaseToQuote: ', { watchedBasePrice, currentPrice, baseAmount, notionalValue });
+      let order: any;
+      if (exchange.id === 'bitget') {
+        order = await exchange.createOrder(symbol, 'market', 'sell', baseAmount);
+      } else {
+        order = await exchange.createMarketSellOrder(symbol, baseAmount);
+      }
+
+      return {
+        success: true,
+        data: order,
+      };
+    } catch (error: any) {
+      let errorMessage = 'An error occurred while placing the order.';
+      if (error instanceof ccxt.BaseError) {
+        errorMessage = `CCXT Error: ${error.message}`;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+  private calculateTotalBalances(): Record<string, number> {
+    const totalBalances: Record<string, number> = {};
+
+    Object.values(this.currentCexBalances).forEach((exchangeBalance) => {
+      // Sum up each token across all exchanges
+      Object.entries(exchangeBalance).forEach(([token, amount]) => {
+        totalBalances[token] = (totalBalances[token] || 0) + amount;
+      });
+    });
+
+    return totalBalances;
+  }
+
+  async simulationArbitrage(
+    satisfiedResults: IListenTicker[],
+    simulationType: SimulationType,
+  ): Promise<ISimulationResult> {
+    const results: ISimulationResult = {
+      success: true,
+      data: this.currentCexBalances,
+      simulationResults: [] as string[],
+      warnings: [] as string[],
+      totalBalances: this.calculateTotalBalances(),
+      profitDetails: [] as string[],
+    };
+    try {
+      satisfiedResults.forEach((result) => {
+        const { symbol, minExchange, minPrice, maxExchange, maxPrice, diffPercentage } = result;
+        const [baseAsset, quoteAsset] = symbol.split('/');
+        const tradeAmount = this.configService.get('usdt_amount'); // Trading with 5 USDT
+
+        // Validate buy side balances (minExchange)
+        if (this.currentCexBalances[minExchange][quoteAsset] < tradeAmount) {
+          results.warnings.push(
+            `Insufficient ${quoteAsset} balance (${this.currentCexBalances[minExchange][quoteAsset]}) in ${minExchange} for buying. Required: ${tradeAmount}`,
+          );
+          return;
+        }
+        // Calculate buy/sell amounts
+        const buyBaseAmount = tradeAmount / minPrice;
+        const sellBaseAmount = tradeAmount / maxPrice;
+
+        // Validate sell side balances (maxExchange)
+        if (this.currentCexBalances[maxExchange][baseAsset] < sellBaseAmount) {
+          results.warnings.push(
+            `Insufficient ${baseAsset} balance (${this.currentCexBalances[maxExchange][baseAsset]}) in ${maxExchange} for selling. Required: ${sellBaseAmount}`,
+          );
+          return;
+        }
+
+        switch (simulationType) {
+          case 'use-native':
+            break;
+          case 'use-deducted':
+            // Calculate real profit
+            const grossProfit = buyBaseAmount - sellBaseAmount;
+            const { totalFeePct } = calculateSpotFees({
+              minExchange,
+              maxExchange,
+              spotFeeType: 'discounted',
+              symbol,
+            });
+            const deductedProfit = (grossProfit * totalFeePct) / diffPercentage;
+            const realProfit = grossProfit - deductedProfit;
+            console.log('__ simulationArbitrage: ', { grossProfit, totalFeePct, deductedProfit, realProfit });
+            // If we reach here, we have sufficient balances => proceed with the simulation
+            // Update minExchange balances (buy)
+            this.currentCexBalances[minExchange][quoteAsset] -= tradeAmount;
+            this.currentCexBalances[minExchange][baseAsset] += buyBaseAmount - deductedProfit;
+
+            // Update maxExchange balances (sell)
+            this.currentCexBalances[maxExchange][quoteAsset] += tradeAmount;
+            this.currentCexBalances[maxExchange][baseAsset] -= sellBaseAmount;
+
+            // Log successful arbitrage
+            const profitDetail =
+              `Arbitrage ${symbol}: ` +
+              `Gross profit: ${grossProfit.toFixed(8)} ${baseAsset}, ` +
+              `Diff %: ${diffPercentage.toFixed(4)}%, ` +
+              `Fee deduction: ${deductedProfit.toFixed(8)} ${baseAsset}, ` +
+              `Real profit: ${realProfit.toFixed(8)} ${baseAsset}`;
+
+            const simulationResult =
+              `Successful arbitrage: ${symbol} - ` +
+              `Buy ${buyBaseAmount.toFixed(8)} ${baseAsset} @ ${minPrice} on ${minExchange}, ` +
+              `Sell ${sellBaseAmount.toFixed(8)} ${baseAsset} @ ${maxPrice} on ${maxExchange} ` +
+              `(${diffPercentage.toFixed(4)}%)`;
+
+            results.profitDetails.push(profitDetail);
+            results.simulationResults.push(simulationResult);
+            break;
+        }
+      });
+
+      if (results.warnings.length > 0) {
+        this.log.warn('Simulation warnings:', results.warnings);
+      }
+
+      results.totalBalances = this.calculateTotalBalances();
+      return results;
+    } catch (error) {
+      this.log.error('Error in simulationArbitrage:', error);
+      return {
+        success: false,
+        error: error.message,
+        data: this.currentCexBalances,
+        totalBalances: this.calculateTotalBalances(),
       };
     }
   }

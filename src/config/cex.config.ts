@@ -1,29 +1,8 @@
 import { CEX } from '@/types/cex.types';
 import { USDT } from '@/config/tokens';
 
-interface TradingPairConfig {
-  defaultValue: number;
-  customValues?: Record<string, number>;
-}
-
-function generateTradingPairs(config: TradingPairConfig): Record<string, number> {
-  const result: Record<string, number> = {};
-  Object.values(USDT).forEach((pair) => {
-    result[pair] = config.customValues?.[pair] ?? config.defaultValue;
-  });
-
-  return result;
-}
-
 export default () => ({
-  symbol: USDT.SOL,
-  symbols: [USDT.ARB, USDT.XRP, USDT.TRUMP, USDT.PENGU, USDT.MOVE, USDT.ALGO],
-  min_profit_percentage: generateTradingPairs({
-    defaultValue: 0.2,
-    customValues: {
-      // [USDT.ADA]: 0.2, // add custom values for specific pairs
-    },
-  }),
+  symbols: [USDT.PENGU],
   exchanges: [
     {
       name: CEX.BINANCE,
@@ -56,10 +35,7 @@ export default () => ({
       apiSecret: process.env.HUOBI_API_SECRET,
     },
   ],
-  usdt_amount: 100,
-  min_usdt_price_diff: {
-    'SOL/USDT': 0.05,
-  },
-  fetch_delay_min: 1000,
-  fetch_delay_max: 1400,
+  usdt_amount: 5,
+  fetch_delay_min: 3000,
+  fetch_delay_max: 4000,
 });

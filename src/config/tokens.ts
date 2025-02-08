@@ -11,8 +11,10 @@ export const USDT = Object.freeze({
   HBAR: 'HBAR/USDT',
   LINK: 'LINK/USDT',
   LTC: 'LTC/USDT',
-  MOVE: 'MOVE/USDT',
+  MOVE: 'MOVE/USDT', // huobi is not tradable
   PENGU: 'PENGU/USDT',
+  PNUT: 'PNUT/USDT',
+  TIA: 'TIA/USDT',
   TON: 'TON/USDT',
   TRUMP: 'TRUMP/USDT',
   TRX: 'TRX/USDT',
@@ -20,5 +22,10 @@ export const USDT = Object.freeze({
   SUI: 'SUI/USDT',
   XLM: 'XLM/USDT',
   XRP: 'XRP/USDT',
+  WIF: 'WIF/USDT',
   WLD: 'WLD/USDT',
+});
+export const USDC = Object.freeze({
+  AI16Z: 'AI16Z/USDC',
+  ADA: 'ADA/USDC',
 });

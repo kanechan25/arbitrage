@@ -60,4 +60,7 @@ export class BybitService {
     // minimum notional: bybit requires min 5 USDT for most pairs
     return await this.cexCommonService.orderQuoteToBase(this.exchange, symbol, quoteAmount, watchedBasePrice);
   }
+  async spotBaseToQuote(symbol: string, baseAmount: number, watchedBasePrice?: number) {
+    return await this.cexCommonService.orderBaseToQuote(this.exchange, symbol, baseAmount, watchedBasePrice);
+  }
 }

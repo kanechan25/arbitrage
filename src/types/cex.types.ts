@@ -1,11 +1,15 @@
 import * as ccxt from 'ccxt';
 
 export type WalletType = 'spot' | 'funding';
+export type SimulationType = 'use-native' | 'use-deducted';
 export interface ITicker {
   exchange: string;
   ticker: ccxt.Ticker;
   timestamp: number;
   last: number;
+}
+export interface IWalletBalance {
+  [key: string]: number;
 }
 export interface ITickerRecords {
   [key: string]: ITicker[];
@@ -26,6 +30,7 @@ export interface IListenTicker {
   maxPrice: number;
   priceDiff: number;
   diffPercentage: number;
+  totalFeePct: number;
   [key: string]: string | number;
 }
 
@@ -49,6 +54,15 @@ export interface IExchangeAnalysis {
     [key: string]: IExchangeStats;
   };
 }
+export interface ISimulationResult {
+  success: boolean;
+  data: Record<string, IWalletBalance>;
+  totalBalances: Record<string, number>;
+  simulationResults?: string[];
+  profitDetails?: string[];
+  warnings?: string[];
+  error?: string | null;
+}
 
 export const CEX = Object.freeze({
   BINANCE: 'binance',
@@ -59,6 +73,32 @@ export const CEX = Object.freeze({
   HUOBI: 'huobi',
 });
 
+export interface WithdrawParams {
+  coin: string;
+  amount: number;
+  address: string;
+  network: string; // Specify network from CHAIN_{CEX}
+  memo?: string; // Required for some coins like XRP
+  tag?: string; // Required for some coins
+  chain?: string; // Specify chain from CHAIN_{CEX}
+}
+
+export interface ICurrencyInterface extends ccxt.CurrencyInterface {
+  fees: {
+    [key: string]: number;
+  };
+}
+export interface ICalculateSpotFees {
+  symbol: string;
+  minExchange: string;
+  maxExchange: string;
+  spotFeeType: 'default' | 'discounted';
+}
+export interface ISpotFees {
+  default: number;
+  discounted: number;
+  customValues?: Record<string, number>;
+}
 export const CHAIN_BN = Object.freeze({
   APTOS: 'APT',
   ARBITRUM: 'ARBITRUM',
@@ -121,19 +161,3 @@ export const CHAIN_HTX = Object.freeze({
   SOL: 'SOL',
   TRON: 'TRC20',
 });
-
-export interface WithdrawParams {
-  coin: string;
-  amount: number;
-  address: string;
-  network: string; // Specify network from CHAIN_{CEX}
-  memo?: string; // Required for some coins like XRP
-  tag?: string; // Required for some coins
-  chain?: string; // Specify chain from CHAIN_{CEX}
-}
-
-export interface ICurrencyInterface extends ccxt.CurrencyInterface {
-  fees: {
-    [key: string]: number;
-  };
-}
