@@ -242,7 +242,7 @@ export class CexCommonService {
     const results: ISimulationResult = {
       success: true,
       data: this.currentCexBalances,
-      simulationResults: [] as string[],
+      simulationResults: {} as Record<string, Record<string, number | string>>,
       warnings: [] as string[],
       profitDetails: [] as string[],
       totalBalances: this.calculateTotalBalances(),
@@ -309,13 +309,19 @@ export class CexCommonService {
             `Total fees %: ${totalFeePct.toFixed(4)}%, ` +
             `Diff %: ${diffPercentage.toFixed(4)}%`;
 
-          const simulationResult =
-            `Successful arbitrage: ${symbol}: ` +
-            `Buy ${buyBaseAmount} ${baseAsset} at ${minPrice} ${quoteAsset} on ${minExchange}, ` +
-            `Sell ${sellBaseAmount} ${baseAsset} at ${maxPrice} ${quoteAsset} on ${maxExchange} `;
+          // const simulationResult =
+          //   `Successful arbitrage: ${symbol}: ` +
+          //   `Buy ${buyBaseAmount} ${baseAsset} at ${minPrice} ${quoteAsset} on ${minExchange}, ` +
+          //   `Sell ${sellBaseAmount} ${baseAsset} at ${maxPrice} ${quoteAsset} on ${maxExchange} `;
 
           results.profitDetails.push(profitDetail);
-          results.simulationResults.push(simulationResult);
+          results.simulationResults[symbol] = {
+            buySellAsset: baseAsset,
+            buyBaseAssetAmount: buyBaseAmount,
+            buyBaseAssetPrice: minPrice,
+            sellBaseAssetAmount: sellBaseAmount,
+            sellBaseAssetPrice: maxPrice,
+          };
         } else if (simulationType === 'use-deducted') {
           // We will get less quote asset due to deducted fees
           const actualBuyBaseAmount = buyBaseAmount * (1 - minExFeePct / 100);
@@ -342,13 +348,19 @@ export class CexCommonService {
             `Diff %: ${diffPercentage.toFixed(4)}%, ` +
             `Total fees %: ${totalFeePct.toFixed(4)}%`;
 
-          const simulationResult =
-            `Successful arbitrage: ${symbol}: ` +
-            `Buy ${buyBaseAmount} ${baseAsset} at ${minPrice} on ${minExchange}, ` +
-            `Sell ${sellBaseAmount} ${baseAsset} at ${maxPrice} on ${maxExchange}!`;
+          // const simulationResult =
+          //   `Successful arbitrage: ${symbol}: ` +
+          //   `Buy ${buyBaseAmount} ${baseAsset} at ${minPrice} on ${minExchange}, ` +
+          //   `Sell ${sellBaseAmount} ${baseAsset} at ${maxPrice} on ${maxExchange}!`;
 
           results.profitDetails.push(profitDetail);
-          results.simulationResults.push(simulationResult);
+          results.simulationResults[symbol] = {
+            buySellAsset: baseAsset,
+            buyBaseAssetAmount: buyBaseAmount,
+            buyBaseAssetPrice: minPrice,
+            sellBaseAssetAmount: sellBaseAmount,
+            sellBaseAssetPrice: maxPrice,
+          };
         }
       });
 
