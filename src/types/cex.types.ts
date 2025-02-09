@@ -60,6 +60,8 @@ export interface ISimulationResult {
   success: boolean;
   data: Record<string, IWalletBalance>;
   totalBalances: Record<string, number>;
+  totalFeesInQuote: Record<string, number>;
+  totalFeesInBase: Record<string, number>;
   simulationResults?: string[];
   profitDetails?: string[];
   warnings?: string[];

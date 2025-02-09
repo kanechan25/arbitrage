@@ -35,7 +35,7 @@ export default () => ({
       apiSecret: process.env.HUOBI_API_SECRET,
     },
   ],
-  usdt_amount: 5,
+  arbitrage_usdt_amount: 5,
   fetch_delay_min: 3000,
   fetch_delay_max: 4000,
 });

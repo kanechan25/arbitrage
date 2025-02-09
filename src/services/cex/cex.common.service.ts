@@ -16,6 +16,8 @@ import { mockCexBalances } from '@/constants/simulations';
 export class CexCommonService {
   private readonly log = new Logger(CexCommonService.name);
   private currentCexBalances: Record<string, IWalletBalance>;
+  private totalFeesInQuote: Record<string, number> = {};
+  private totalFeesInBase: Record<string, number> = {};
 
   constructor(
     private pricesService: PricesService,
@@ -242,8 +244,10 @@ export class CexCommonService {
       data: this.currentCexBalances,
       simulationResults: [] as string[],
       warnings: [] as string[],
-      totalBalances: this.calculateTotalBalances(),
       profitDetails: [] as string[],
+      totalBalances: this.calculateTotalBalances(),
+      totalFeesInQuote: this.totalFeesInQuote,
+      totalFeesInBase: this.totalFeesInBase,
     };
     try {
       satisfiedResults.forEach((result) => {
@@ -259,7 +263,7 @@ export class CexCommonService {
           maxExFeePct,
         } = result;
         const [baseAsset, quoteAsset] = symbol.split('/');
-        const tradeAmount = this.configService.get('usdt_amount');
+        const tradeAmount = this.configService.get('arbitrage_usdt_amount');
 
         // Validate buy side balances (minExchange)
         if (this.currentCexBalances[minExchange][quoteAsset] < tradeAmount) {
@@ -285,6 +289,8 @@ export class CexCommonService {
           // Calculate actual fees in quote asset (e.g., USDT)
           const buyFeeInQuote = tradeAmount * (minExFeePct / 100);
           const sellFeeInQuote = tradeAmount * (maxExFeePct / 100);
+          const totalFeeInQuote = buyFeeInQuote + sellFeeInQuote;
+          this.totalFeesInQuote[quoteAsset] = (this.totalFeesInQuote[quoteAsset] || 0) + totalFeeInQuote;
 
           // Update minExchange balances (buy)
           this.currentCexBalances[minExchange][quoteAsset] -= tradeAmount;
@@ -296,16 +302,17 @@ export class CexCommonService {
 
           const profitDetail =
             `Arbitrage ${symbol}: ` +
-            `Gross profit: ${grossProfit.toFixed(8)} ${baseAsset} (${(grossProfit * minPrice).toFixed(8)} ${quoteAsset}), ` +
-            `Net profit in Quote Asset: ${grossProfit * minPrice - (buyFeeInQuote + sellFeeInQuote)} ${quoteAsset}, ` +
-            `Total fees in Quote Asset: ${buyFeeInQuote + sellFeeInQuote} ${quoteAsset}, ` +
+            `Gross profit: ${grossProfit} ${baseAsset} (${grossProfit * minPrice} ${quoteAsset}), ` +
+            `Net profit in Quote: ${grossProfit * minPrice - (buyFeeInQuote + sellFeeInQuote)} ${quoteAsset}, ` +
+            `Total fees in Quote: ${totalFeeInQuote} ${quoteAsset}, ` +
+            `Accumulated fees in ${quoteAsset}: ${this.totalFeesInQuote[quoteAsset]}, ` +
             `Total fees %: ${totalFeePct.toFixed(4)}%, ` +
             `Diff %: ${diffPercentage.toFixed(4)}%`;
 
           const simulationResult =
             `Successful arbitrage: ${symbol}: ` +
-            `Buy ${buyBaseAmount.toFixed(8)} ${baseAsset} at ${minPrice} ${quoteAsset} on ${minExchange}, ` +
-            `Sell ${sellBaseAmount.toFixed(8)} ${baseAsset} at ${maxPrice} ${quoteAsset} on ${maxExchange} `;
+            `Buy ${buyBaseAmount} ${baseAsset} at ${minPrice} ${quoteAsset} on ${minExchange}, ` +
+            `Sell ${sellBaseAmount} ${baseAsset} at ${maxPrice} ${quoteAsset} on ${maxExchange} `;
 
           results.profitDetails.push(profitDetail);
           results.simulationResults.push(simulationResult);
@@ -313,9 +320,11 @@ export class CexCommonService {
           // We will get less quote asset due to deducted fees
           const actualBuyBaseAmount = buyBaseAmount * (1 - minExFeePct / 100);
           const actualSellQuoteAmount = sellBaseAmount * (1 - maxExFeePct / 100) * maxPrice;
-          console.log('__ actualBuyBaseAmount: ', actualBuyBaseAmount);
-          console.log('__ actualSellBaseAmount: ', sellBaseAmount * (1 - maxExFeePct / 100));
-          console.log('__ actualSellQuoteAmount: ', actualSellQuoteAmount);
+          const feesInQuote = tradeAmount - actualSellQuoteAmount;
+          const feesInBase = buyBaseAmount - actualBuyBaseAmount;
+
+          this.totalFeesInQuote[quoteAsset] = (this.totalFeesInQuote[quoteAsset] || 0) + feesInQuote;
+          this.totalFeesInBase[baseAsset] = (this.totalFeesInBase[baseAsset] || 0) + feesInBase;
 
           // Update minExchange balances (buy)
           this.currentCexBalances[minExchange][quoteAsset] -= tradeAmount;
@@ -326,17 +335,17 @@ export class CexCommonService {
           this.currentCexBalances[maxExchange][quoteAsset] += actualSellQuoteAmount;
 
           const profitDetail =
-            `Arbitrage ${symbol}: ` +
-            `Gross profit: ${grossProfit.toFixed(8)} ${baseAsset}, ` +
-            `Fees impact baseAsset: ${(buyBaseAmount - actualBuyBaseAmount).toFixed(8)} ${baseAsset}, ` +
-            `Fees impact quoteAsset: ${(tradeAmount - actualSellQuoteAmount).toFixed(8)} ${quoteAsset}, ` +
+            `${symbol}: ` +
+            `Gross profit: ${grossProfit} ${baseAsset}, ` +
+            `Fees in base: ${feesInBase} ${baseAsset}, ` +
+            `Fees in quote: ${feesInQuote} ${quoteAsset}, ` +
             `Diff %: ${diffPercentage.toFixed(4)}%, ` +
-            `Total exchange fee %: ${totalFeePct.toFixed(4)}%`;
+            `Total fees %: ${totalFeePct.toFixed(4)}%`;
 
           const simulationResult =
             `Successful arbitrage: ${symbol}: ` +
-            `Buy ${buyBaseAmount.toFixed(8)} ${baseAsset} at ${minPrice} on ${minExchange}, ` +
-            `Sell ${sellBaseAmount.toFixed(8)} ${baseAsset} at ${maxPrice} on ${maxExchange} `;
+            `Buy ${buyBaseAmount} ${baseAsset} at ${minPrice} on ${minExchange}, ` +
+            `Sell ${sellBaseAmount} ${baseAsset} at ${maxPrice} on ${maxExchange}!`;
 
           results.profitDetails.push(profitDetail);
           results.simulationResults.push(simulationResult);
@@ -356,6 +365,8 @@ export class CexCommonService {
         error: error.message,
         data: this.currentCexBalances,
         totalBalances: this.calculateTotalBalances(),
+        totalFeesInQuote: this.totalFeesInQuote,
+        totalFeesInBase: this.totalFeesInBase,
       };
     }
   }
