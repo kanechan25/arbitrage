@@ -290,7 +290,7 @@ export class CexCommonService {
           const buyFeeInQuote = tradeAmount * (minExFeePct / 100);
           const sellFeeInQuote = tradeAmount * (maxExFeePct / 100);
           const totalFeeInQuote = buyFeeInQuote + sellFeeInQuote;
-          this.totalFeesInQuote[quoteAsset] = (this.totalFeesInQuote[quoteAsset] || 0) + totalFeeInQuote;
+          this.totalFeesInQuote[symbol] = (this.totalFeesInQuote[symbol] || 0) + totalFeeInQuote;
 
           // Update minExchange balances (buy)
           this.currentCexBalances[minExchange][quoteAsset] -= tradeAmount;
@@ -305,7 +305,7 @@ export class CexCommonService {
             `Gross profit: ${grossProfit} ${baseAsset} (${grossProfit * minPrice} ${quoteAsset}), ` +
             `Net profit in Quote: ${grossProfit * minPrice - (buyFeeInQuote + sellFeeInQuote)} ${quoteAsset}, ` +
             `Total fees in Quote: ${totalFeeInQuote} ${quoteAsset}, ` +
-            `Accumulated fees in ${quoteAsset}: ${this.totalFeesInQuote[quoteAsset]}, ` +
+            `Accumulated fees in ${quoteAsset}: ${this.totalFeesInQuote[symbol]}, ` +
             `Total fees %: ${totalFeePct.toFixed(4)}%, ` +
             `Diff %: ${diffPercentage.toFixed(4)}%`;
 
@@ -323,8 +323,8 @@ export class CexCommonService {
           const feesInQuote = tradeAmount - actualSellQuoteAmount;
           const feesInBase = buyBaseAmount - actualBuyBaseAmount;
 
-          this.totalFeesInQuote[quoteAsset] = (this.totalFeesInQuote[quoteAsset] || 0) + feesInQuote;
-          this.totalFeesInBase[baseAsset] = (this.totalFeesInBase[baseAsset] || 0) + feesInBase;
+          this.totalFeesInQuote[symbol] = (this.totalFeesInQuote[symbol] || 0) + feesInQuote;
+          this.totalFeesInBase[symbol] = (this.totalFeesInBase[symbol] || 0) + feesInBase;
 
           // Update minExchange balances (buy)
           this.currentCexBalances[minExchange][quoteAsset] -= tradeAmount;

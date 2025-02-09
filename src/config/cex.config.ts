@@ -2,7 +2,7 @@ import { CEX } from '@/types/cex.types';
 import { USDT } from '@/config/tokens';
 
 export default () => ({
-  symbols: [USDT.PENGU],
+  symbols: [USDT.PENGU, USDT.ARB, USDT.HBAR],
   exchanges: [
     {
       name: CEX.BINANCE,
@@ -36,6 +36,6 @@ export default () => ({
     },
   ],
   arbitrage_usdt_amount: 5,
-  fetch_delay_min: 3000,
-  fetch_delay_max: 4000,
+  fetch_delay_min: 1000,
+  fetch_delay_max: 2000,
 });
