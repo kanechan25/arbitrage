@@ -241,10 +241,11 @@ export class CexCommonService {
   ): Promise<ISimulationResult> {
     const results: ISimulationResult = {
       success: true,
+      feeDeductionType: simulationType,
       data: this.currentCexBalances,
       simulationResults: {} as Record<string, Record<string, number | string>>,
+      profitDetails: {} as Record<string, Record<string, number | string>>,
       warnings: [] as string[],
-      profitDetails: [] as string[],
       totalBalances: this.calculateTotalBalances(),
       totalFeesInQuote: this.totalFeesInQuote,
       totalFeesInBase: this.totalFeesInBase,
@@ -289,8 +290,8 @@ export class CexCommonService {
           // Calculate actual fees in quote asset (e.g., USDT)
           const buyFeeInQuote = tradeAmount * (minExFeePct / 100);
           const sellFeeInQuote = tradeAmount * (maxExFeePct / 100);
-          const totalFeeInQuote = buyFeeInQuote + sellFeeInQuote;
-          this.totalFeesInQuote[symbol] = (this.totalFeesInQuote[symbol] || 0) + totalFeeInQuote;
+          const feesInQuote = buyFeeInQuote + sellFeeInQuote;
+          this.totalFeesInQuote[symbol] = (this.totalFeesInQuote[symbol] || 0) + feesInQuote;
 
           // Update minExchange balances (buy)
           this.currentCexBalances[minExchange][quoteAsset] -= tradeAmount;
@@ -300,21 +301,27 @@ export class CexCommonService {
           this.currentCexBalances[maxExchange][quoteAsset] += tradeAmount;
           this.currentCexBalances[maxExchange][baseAsset] -= sellBaseAmount;
 
-          const profitDetail =
-            `Arbitrage ${symbol}: ` +
-            `Gross profit: ${grossProfit} ${baseAsset} (${grossProfit * minPrice} ${quoteAsset}), ` +
-            `Net profit in Quote: ${grossProfit * minPrice - (buyFeeInQuote + sellFeeInQuote)} ${quoteAsset}, ` +
-            `Total fees in Quote: ${totalFeeInQuote} ${quoteAsset}, ` +
-            `Accumulated fees in ${quoteAsset}: ${this.totalFeesInQuote[symbol]}, ` +
-            `Total fees %: ${totalFeePct.toFixed(4)}%, ` +
-            `Diff %: ${diffPercentage.toFixed(4)}%`;
+          results.profitDetails[symbol] = {
+            grossProfit: grossProfit,
+            netProfitInQuote: grossProfit * minPrice - feesInQuote,
+            feesInQuote,
+            feesInBase: 0,
+            accumulatedFeesInQuote: this.totalFeesInQuote[symbol],
+            accumulatedFeesInBase: 0,
+            pctFees: {
+              totalFeePct: totalFeePct.toFixed(4),
+              minExFee: {
+                pct: minExFeePct.toFixed(4),
+                exchange: minExchange,
+              },
+              maxExFee: {
+                pct: maxExFeePct.toFixed(4),
+                exchange: maxExchange,
+              },
+            },
+            diffPercentage: diffPercentage.toFixed(4),
+          };
 
-          // const simulationResult =
-          //   `Successful arbitrage: ${symbol}: ` +
-          //   `Buy ${buyBaseAmount} ${baseAsset} at ${minPrice} ${quoteAsset} on ${minExchange}, ` +
-          //   `Sell ${sellBaseAmount} ${baseAsset} at ${maxPrice} ${quoteAsset} on ${maxExchange} `;
-
-          results.profitDetails.push(profitDetail);
           results.simulationResults[symbol] = {
             buySellAsset: baseAsset,
             buyBaseAssetAmount: buyBaseAmount,
@@ -325,7 +332,8 @@ export class CexCommonService {
         } else if (simulationType === 'use-deducted') {
           // We will get less quote asset due to deducted fees
           const actualBuyBaseAmount = buyBaseAmount * (1 - minExFeePct / 100);
-          const actualSellQuoteAmount = sellBaseAmount * (1 - maxExFeePct / 100) * maxPrice;
+          const actualSellBaseAmount = sellBaseAmount * (1 - maxExFeePct / 100);
+          const actualSellQuoteAmount = actualSellBaseAmount * maxPrice;
           const feesInQuote = tradeAmount - actualSellQuoteAmount;
           const feesInBase = buyBaseAmount - actualBuyBaseAmount;
 
@@ -340,25 +348,32 @@ export class CexCommonService {
           this.currentCexBalances[maxExchange][baseAsset] -= sellBaseAmount;
           this.currentCexBalances[maxExchange][quoteAsset] += actualSellQuoteAmount;
 
-          const profitDetail =
-            `${symbol}: ` +
-            `Gross profit: ${grossProfit} ${baseAsset}, ` +
-            `Fees in base: ${feesInBase} ${baseAsset}, ` +
-            `Fees in quote: ${feesInQuote} ${quoteAsset}, ` +
-            `Diff %: ${diffPercentage.toFixed(4)}%, ` +
-            `Total fees %: ${totalFeePct.toFixed(4)}%`;
+          results.profitDetails[symbol] = {
+            grossProfit: grossProfit,
+            netProfitInQuote: grossProfit * minPrice - feesInQuote,
+            feesInQuote,
+            feesInBase,
+            accumulatedFeesInQuote: this.totalFeesInQuote[symbol],
+            accumulatedFeesInBase: this.totalFeesInBase[symbol],
+            pctFees: {
+              totalFeePct: totalFeePct.toFixed(4),
+              minExFee: {
+                pct: minExFeePct.toFixed(4),
+                exchange: minExchange,
+              },
+              maxExFee: {
+                pct: maxExFeePct.toFixed(4),
+                exchange: maxExchange,
+              },
+            },
+            diffPercentage: diffPercentage.toFixed(4),
+          };
 
-          // const simulationResult =
-          //   `Successful arbitrage: ${symbol}: ` +
-          //   `Buy ${buyBaseAmount} ${baseAsset} at ${minPrice} on ${minExchange}, ` +
-          //   `Sell ${sellBaseAmount} ${baseAsset} at ${maxPrice} on ${maxExchange}!`;
-
-          results.profitDetails.push(profitDetail);
           results.simulationResults[symbol] = {
             buySellAsset: baseAsset,
-            buyBaseAssetAmount: buyBaseAmount,
+            buyBaseAssetAmount: actualBuyBaseAmount,
             buyBaseAssetPrice: minPrice,
-            sellBaseAssetAmount: sellBaseAmount,
+            sellBaseAssetAmount: actualSellBaseAmount,
             sellBaseAssetPrice: maxPrice,
           };
         }
@@ -375,6 +390,7 @@ export class CexCommonService {
       return {
         success: false,
         error: error.message,
+        feeDeductionType: simulationType,
         data: this.currentCexBalances,
         totalBalances: this.calculateTotalBalances(),
         totalFeesInQuote: this.totalFeesInQuote,

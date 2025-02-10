@@ -63,7 +63,10 @@ export interface ISimulationResult {
   totalFeesInQuote: Record<string, number>;
   totalFeesInBase: Record<string, number>;
   simulationResults?: Record<string, Record<string, number | string>>;
-  profitDetails?: string[];
+  profitDetails?: Record<
+    string,
+    Record<string, number | string | Record<string, number | string | Record<string, number | string>>>
+  >;
   warnings?: string[];
   error?: string | null;
 }
