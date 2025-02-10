@@ -242,11 +242,11 @@ export class CexCommonService {
     const results: ISimulationResult = {
       success: true,
       feeDeductionType: simulationType,
-      data: this.currentCexBalances,
+      currentCexBalances: this.currentCexBalances,
       simulationResults: {} as Record<string, Record<string, number | string>>,
       profitDetails: {} as Record<string, Record<string, number | string>>,
       warnings: [] as string[],
-      totalBalances: this.calculateTotalBalances(),
+      totalCexBalances: this.calculateTotalBalances(),
       totalFeesInQuote: this.totalFeesInQuote,
       totalFeesInBase: this.totalFeesInBase,
     };
@@ -285,7 +285,6 @@ export class CexCommonService {
           return;
         }
         const grossProfit = buyBaseAmount - sellBaseAmount;
-        console.log('__ log calculation: ', { buyBaseAmount, sellBaseAmount, totalFeePct, minExFeePct, maxExFeePct });
         if (simulationType === 'use-native') {
           // Calculate actual fees in quote asset (e.g., USDT)
           const buyFeeInQuote = tradeAmount * (minExFeePct / 100);
@@ -383,7 +382,7 @@ export class CexCommonService {
         this.log.warn('Simulation warnings:', results.warnings);
       }
 
-      results.totalBalances = this.calculateTotalBalances();
+      results.totalCexBalances = this.calculateTotalBalances();
       return results;
     } catch (error) {
       this.log.error('Error in simulationArbitrage:', error);
@@ -391,8 +390,8 @@ export class CexCommonService {
         success: false,
         error: error?.message,
         feeDeductionType: simulationType,
-        data: this.currentCexBalances,
-        totalBalances: this.calculateTotalBalances(),
+        currentCexBalances: this.currentCexBalances,
+        totalCexBalances: this.calculateTotalBalances(),
         totalFeesInQuote: this.totalFeesInQuote,
         totalFeesInBase: this.totalFeesInBase,
       };
