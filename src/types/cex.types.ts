@@ -58,6 +58,7 @@ export interface IExchangeAnalysis {
 }
 export interface ISimulationResult {
   success: boolean;
+  feeDeductionType: SimulationType;
   data: Record<string, IWalletBalance>;
   totalBalances: Record<string, number>;
   totalFeesInQuote: Record<string, number>;
