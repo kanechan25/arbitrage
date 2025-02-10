@@ -75,11 +75,12 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
           // Every item in results is a satisfied result => TODO: ARBITRAGE (!!!slippage)
 
           const simulationResults = await Promise.all(
-            results.map((result) => this.cexCommonService.simulationArbitrage(result, SIMULATION_TYPE)),
+            results.map((result) => {
+              const simulationResult = this.cexCommonService.simulationArbitrage(result, SIMULATION_TYPE);
+              return simulationResult;
+            }),
           );
-
-          const stringifySimulation = JSON.stringify(simulationResults[0]);
-          this.logger.log('__ stringifySimulation: ', stringifySimulation);
+          console.log('__ simulationResults: ', simulationResults);
           if (simulationResults.some((result) => result.warnings.length > 0)) {
             this.stopWatching();
             return;

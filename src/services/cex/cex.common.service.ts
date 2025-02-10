@@ -11,6 +11,7 @@ import {
   WalletType,
   WithdrawParams,
 } from '@/types/cex.types';
+import { LoggerService } from '@/services/_logger.service';
 import { mockCexBalances } from '@/constants/simulations';
 @Injectable()
 export class CexCommonService {
@@ -22,6 +23,7 @@ export class CexCommonService {
   constructor(
     private pricesService: PricesService,
     private configService: ConfigService,
+    private logger: LoggerService,
   ) {
     this.currentCexBalances = JSON.parse(JSON.stringify(mockCexBalances));
   }
@@ -388,8 +390,11 @@ export class CexCommonService {
           sellBaseAssetPrice: maxPrice,
         };
       }
-
       results.totalCexBalances = this.calculateTotalBalances(this.currentCexBalances);
+      const dataSimulation = {
+        [symbol]: JSON.stringify(results),
+      };
+      this.logger.logArbitrage(dataSimulation);
       return results;
     } catch (error) {
       this.log.error('Error in simulationArbitrage:', error);
