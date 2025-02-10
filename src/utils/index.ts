@@ -44,5 +44,5 @@ export function calculateSpotFees(params: ICalculateSpotFees): {
   const symbolMexcFeePct = spotFees[CEX.MEXC].customValues[symbol] ?? spotFees[CEX.MEXC][spotFeeType];
   const minExFeePct = minExchange === CEX.MEXC ? symbolMexcFeePct : spotFees[minExchange][spotFeeType];
   const maxExFeePct = maxExchange === CEX.MEXC ? symbolMexcFeePct : spotFees[maxExchange][spotFeeType];
-  return { totalFeePct: minExFeePct + maxExFeePct, minExFeePct, maxExFeePct };
+  return { totalFeePct: Number((minExFeePct + maxExFeePct).toFixed(6)), minExFeePct, maxExFeePct };
 }

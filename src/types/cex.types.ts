@@ -31,6 +31,8 @@ export interface IListenTicker {
   priceDiff: number;
   diffPercentage: number;
   totalFeePct: number;
+  minExFeePct: number;
+  maxExFeePct: number;
   [key: string]: string | number;
 }
 
@@ -56,12 +58,18 @@ export interface IExchangeAnalysis {
 }
 export interface ISimulationResult {
   success: boolean;
-  data: Record<string, IWalletBalance>;
-  totalBalances: Record<string, number>;
-  simulationResults?: string[];
-  profitDetails?: string[];
+  feeDeductionType: SimulationType;
+  currentCexBalances: Record<string, IWalletBalance>;
+  totalCexBalances: Record<string, number>;
+  totalFeesInQuote: Record<string, number>;
+  totalFeesInBase: Record<string, number>;
+  simulationResults?: Record<string, Record<string, number | string>>;
+  profitDetails?: Record<
+    string,
+    Record<string, number | string | Record<string, number | string | Record<string, number | string>>>
+  >;
   warnings?: string[];
-  error?: string | null;
+  error?: string | null | undefined;
 }
 
 export const CEX = Object.freeze({
@@ -92,7 +100,7 @@ export interface ICalculateSpotFees {
   symbol: string;
   minExchange: string;
   maxExchange: string;
-  spotFeeType: 'default' | 'discounted';
+  spotFeeType: 'default' | 'discounted'; // 'use-native' will be 'discounted', if 'use-deducted' will be 'default'
 }
 export interface ISpotFees {
   default: number;

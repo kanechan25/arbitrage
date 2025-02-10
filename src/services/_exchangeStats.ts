@@ -38,7 +38,16 @@ export async function analyzeExchangeLog(logFilePath: string): Promise<IExchange
         from: new Date(0),
         until: new Date(),
         order: 'asc',
-        fields: ['maxExchange', 'minExchange', 'diffPercentage', 'timestamp', 'symbol'],
+        fields: [
+          'maxExchange',
+          'minExchange',
+          'diffPercentage',
+          'timestamp',
+          'symbol',
+          'totalFeePct',
+          'minExFeePct',
+          'maxExFeePct',
+        ],
       },
       (err, results) => {
         if (err) {
@@ -79,7 +88,7 @@ export async function analyzeExchangeLog(logFilePath: string): Promise<IExchange
         }
         result.satisfiedProfitPctAvg =
           result.satisfiedPctCount > 0
-            ? Number((result.satisfiedProfitPctAvg / result.satisfiedPctCount).toFixed(4))
+            ? Number((result.satisfiedProfitPctAvg / result.satisfiedPctCount).toFixed(6))
             : 0;
         result.totalRows = logEntries.length;
         result.startTimestamp = logEntries[0]?.timestamp;
