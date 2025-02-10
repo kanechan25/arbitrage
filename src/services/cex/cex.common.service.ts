@@ -389,7 +389,7 @@ export class CexCommonService {
       this.log.error('Error in simulationArbitrage:', error);
       return {
         success: false,
-        error: error.message,
+        error: error?.message,
         feeDeductionType: simulationType,
         data: this.currentCexBalances,
         totalBalances: this.calculateTotalBalances(),

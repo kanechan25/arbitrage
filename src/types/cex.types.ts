@@ -69,7 +69,7 @@ export interface ISimulationResult {
     Record<string, number | string | Record<string, number | string | Record<string, number | string>>>
   >;
   warnings?: string[];
-  error?: string | null;
+  error?: string | null | undefined;
 }
 
 export const CEX = Object.freeze({
