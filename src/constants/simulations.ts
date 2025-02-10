@@ -1,4 +1,4 @@
-import { CEX, IWalletBalance } from '@/types/cex.types';
+import { CEX, IWalletBalance, SimulationType } from '@/types/cex.types';
 
 export const mockCexBalances: Record<string, IWalletBalance> = {
   [CEX.BINANCE]: {
@@ -38,3 +38,5 @@ export const mockCexBalances: Record<string, IWalletBalance> = {
     HBAR: 10000,
   },
 };
+
+export const SIMULATION_TYPE: SimulationType = 'use-native';

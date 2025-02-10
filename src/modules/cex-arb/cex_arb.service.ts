@@ -10,6 +10,7 @@ import { OkxService } from '@/services/cex/okx/okx.service';
 import { MexcService } from '@/services/cex/mexc/mexc.service';
 import { HuobiService } from '@/services/cex/huobi/huobi.service';
 import { CexCommonService } from '@/services/cex/cex.common.service';
+import { SIMULATION_TYPE } from '@/constants/simulations';
 // import { LOG_PATHS } from '@/constants/logs';
 
 @Injectable()
@@ -62,12 +63,17 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
     const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        const results = await this.pricesService.fetch_findOp_log_Tickers(this.exchanges, symbols, 'use-native', false);
+        const results = await this.pricesService.fetch_findOp_log_Tickers(
+          this.exchanges,
+          symbols,
+          SIMULATION_TYPE,
+          false,
+        );
         CexArbService.fetchCount++;
         console.log(`___________Fetch count: ${CexArbService.fetchCount}`);
         if (results) {
           // Every item in results is a satisfied result => TODO: ARBITRAGE (!!!slippage)
-          const simulationResult = await this.cexCommonService.simulationArbitrage(results, 'use-native');
+          const simulationResult = await this.cexCommonService.simulationArbitrage(results, SIMULATION_TYPE);
           this.logger.log('__simulationResult: ', simulationResult);
           if (simulationResult.warnings.length > 0) {
             this.stopWatching();
