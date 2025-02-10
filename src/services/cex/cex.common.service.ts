@@ -309,17 +309,17 @@ export class CexCommonService {
             accumulatedFeesInQuote: this.totalFeesInQuote[symbol],
             accumulatedFeesInBase: 0,
             pctFees: {
-              totalFeePct: totalFeePct.toFixed(4),
+              totalFeePct: totalFeePct.toFixed(6),
               minExFee: {
-                pct: minExFeePct.toFixed(4),
+                pct: minExFeePct.toFixed(6),
                 exchange: minExchange,
               },
               maxExFee: {
-                pct: maxExFeePct.toFixed(4),
+                pct: maxExFeePct.toFixed(6),
                 exchange: maxExchange,
               },
             },
-            diffPercentage: diffPercentage.toFixed(4),
+            diffPercentage: diffPercentage.toFixed(6),
           };
 
           results.simulationResults[symbol] = {
@@ -356,17 +356,17 @@ export class CexCommonService {
             accumulatedFeesInQuote: this.totalFeesInQuote[symbol],
             accumulatedFeesInBase: this.totalFeesInBase[symbol],
             pctFees: {
-              totalFeePct: totalFeePct.toFixed(4),
+              totalFeePct: totalFeePct.toFixed(6),
               minExFee: {
-                pct: minExFeePct.toFixed(4),
+                pct: minExFeePct.toFixed(6),
                 exchange: minExchange,
               },
               maxExFee: {
-                pct: maxExFeePct.toFixed(4),
+                pct: maxExFeePct.toFixed(6),
                 exchange: maxExchange,
               },
             },
-            diffPercentage: diffPercentage.toFixed(4),
+            diffPercentage: diffPercentage.toFixed(6),
           };
 
           results.simulationResults[symbol] = {

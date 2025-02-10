@@ -8,11 +8,11 @@ export const spotFees: Record<string, ISpotFees> = {
   },
   [CEX.OKX]: {
     default: 0.1,
-    discounted: 0.01,
+    discounted: 0.07,
   },
   [CEX.MEXC]: {
     default: 0.05,
-    discounted: 0.0025,
+    discounted: 0.025,
     customValues: {
       [USDT.APT]: 0,
       [USDT.ARB]: 0,
@@ -25,14 +25,14 @@ export const spotFees: Record<string, ISpotFees> = {
   },
   [CEX.BITGET]: {
     default: 0.1,
-    discounted: 0.008,
+    discounted: 0.08,
   },
   [CEX.BYBIT]: {
     default: 0.1,
-    discounted: 0.01,
+    discounted: 0.08,
   },
   [CEX.HUOBI]: {
     default: 0.2,
-    discounted: 0.01275,
+    discounted: 0.1275,
   },
 };
