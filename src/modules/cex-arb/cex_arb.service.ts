@@ -85,7 +85,7 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
         //     return;
         //   }
         // }
-        const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS, true);
+        const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS, false);
         this.logger.log('__analysis: ', analysis);
         // const result = await this.mexcService.fetchBalance(['PENGU'], 'spot');
         // this.logger.log('__result: ', result);
