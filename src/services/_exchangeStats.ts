@@ -28,6 +28,9 @@ export async function analyzeExchangeLog(logFilePath: string): Promise<IExchange
     duration: '',
     satisfiedPctCount: 0,
     satisfiedProfitPctAvg: 0,
+    satisfiedTotalFeePctAvg: 0,
+    satisfiedMinPriceAvg: 0,
+    satisfiedMaxPriceAvg: 0,
     averageSatisfiedTime: '',
     symbol: '',
   };
@@ -47,6 +50,8 @@ export async function analyzeExchangeLog(logFilePath: string): Promise<IExchange
           'totalFeePct',
           'minExFeePct',
           'maxExFeePct',
+          'minPrice',
+          'maxPrice',
         ],
       },
       (err, results) => {
@@ -73,6 +78,9 @@ export async function analyzeExchangeLog(logFilePath: string): Promise<IExchange
               if (data.diffPercentage && data.diffPercentage > data.totalFeePct) {
                 result.satisfiedPctCount++;
                 result.satisfiedProfitPctAvg += data.diffPercentage;
+                result.satisfiedTotalFeePctAvg += data.totalFeePct;
+                result.satisfiedMinPriceAvg += data.minPrice;
+                result.satisfiedMaxPriceAvg += data.maxPrice;
               }
               if (result.exchanges[data?.maxExchange]) {
                 result.exchanges[data?.maxExchange].maxExCount++;
@@ -90,12 +98,24 @@ export async function analyzeExchangeLog(logFilePath: string): Promise<IExchange
           result.satisfiedPctCount > 0
             ? Number((result.satisfiedProfitPctAvg / result.satisfiedPctCount).toFixed(6))
             : 0;
+        result.satisfiedTotalFeePctAvg =
+          result.satisfiedPctCount > 0
+            ? Number((result.satisfiedTotalFeePctAvg / result.satisfiedPctCount).toFixed(6))
+            : 0;
+        result.satisfiedMinPriceAvg =
+          result.satisfiedPctCount > 0
+            ? Number((result.satisfiedMinPriceAvg / result.satisfiedPctCount).toFixed(6))
+            : 0;
+        result.satisfiedMaxPriceAvg =
+          result.satisfiedPctCount > 0
+            ? Number((result.satisfiedMaxPriceAvg / result.satisfiedPctCount).toFixed(6))
+            : 0;
         result.totalRows = logEntries.length;
         result.startTimestamp = logEntries[0]?.timestamp;
         result.endTimestamp = logEntries[logEntries.length - 1]?.timestamp;
         result.duration = calculateTimeDifference(result.endTimestamp.toString(), result.startTimestamp.toString());
         result.averageSatisfiedTime = calculateAverageTime(result.satisfiedPctCount, result.duration);
-        // Calculate percentages only if we have data
+        // Calculate min/max percentages of CEXs only if we have data
         if (result.totalRows > 0) {
           Object.keys(result.exchanges).forEach((exchange) => {
             const stats = result.exchanges[exchange];

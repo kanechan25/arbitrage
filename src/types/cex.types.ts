@@ -48,6 +48,9 @@ export interface IExchangeAnalysis {
   totalRows: number;
   satisfiedPctCount: number;
   satisfiedProfitPctAvg: number;
+  satisfiedTotalFeePctAvg: number;
+  satisfiedMinPriceAvg: number;
+  satisfiedMaxPriceAvg: number;
   averageSatisfiedTime: string;
   startTimestamp: number | string;
   endTimestamp: number | string;

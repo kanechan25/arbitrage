@@ -10,8 +10,8 @@ import { OkxService } from '@/services/cex/okx/okx.service';
 import { MexcService } from '@/services/cex/mexc/mexc.service';
 import { HuobiService } from '@/services/cex/huobi/huobi.service';
 import { CexCommonService } from '@/services/cex/cex.common.service';
-import { SIMULATION_TYPE } from '@/constants/simulations';
-// import { LOG_PATHS } from '@/constants/logs';
+// import { SIMULATION_TYPE } from '@/constants/simulations';
+import { LOG_PATHS } from '@/constants/logs';
 
 @Injectable()
 export class CexArbService implements OnModuleInit, OnModuleDestroy {
@@ -60,37 +60,37 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
   async startWatching() {
     this.isWatching = true;
     // const [base, quote] = symbol.split('/');
-    const symbols: string[] = this.configService.get('symbols');
+    // const symbols: string[] = this.configService.get('symbols');
     try {
       while (this.isWatching) {
-        const results = await this.pricesService.fetch_findOp_log_Tickers(
-          this.exchanges,
-          symbols,
-          SIMULATION_TYPE,
-          false,
-        );
-        CexArbService.fetchCount++;
-        console.log(`___________Fetch count: ${CexArbService.fetchCount}`);
-        if (results) {
-          // Every item in results is a satisfied result => TODO: ARBITRAGE (!!!slippage)
-
-          const simulationResults = await Promise.all(
-            results.map((result) => {
-              const simulationResult = this.cexCommonService.simulationArbitrage(result, SIMULATION_TYPE);
-              return simulationResult;
-            }),
-          );
-          if (simulationResults.some((result) => result.warnings.length > 0)) {
-            this.stopWatching();
-            return;
-          }
-        }
-        // const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS, true);
-        // this.logger.log('__analysis: ', analysis);
+        // const results = await this.pricesService.fetch_findOp_log_Tickers(
+        //   this.exchanges,
+        //   symbols,
+        //   SIMULATION_TYPE,
+        //   false,
+        // );
+        // CexArbService.fetchCount++;
+        // console.log(`___________Fetch count: ${CexArbService.fetchCount}`);
+        // if (results) {
+        //   // Every item in results is a satisfied result => TODO: ARBITRAGE (!!!slippage)
+        //   const simulationResults = await Promise.all(
+        //     results.map((result) => {
+        //       const simulationResult = this.cexCommonService.simulationArbitrage(result, SIMULATION_TYPE);
+        //       return simulationResult;
+        //     }),
+        //   );
+        //   console.log('__ simulationResults: ', simulationResults);
+        //   if (simulationResults.some((result) => result.warnings.length > 0)) {
+        //     this.stopWatching();
+        //     return;
+        //   }
+        // }
+        const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS, false);
+        this.logger.log('__analysis: ', analysis);
         // const result = await this.mexcService.fetchBalance(['PENGU'], 'spot');
         // this.logger.log('__result: ', result);
-        // this.stopWatching();
-        await this.pricesService.delay();
+        this.stopWatching();
+        // await this.pricesService.delay();
       }
     } catch (error) {
       this.logger.error('Error in price watching loop:', error);
