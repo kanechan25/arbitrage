@@ -62,7 +62,17 @@ export class SimulationService {
       minExFeePct,
       maxExFeePct,
     } = satisfiedResults;
+    const [baseAsset, quoteAsset] = symbol.split('/');
+    const tradeAmount = this.configService.get('arbitrage_usdt_amount');
+
     this.currentCexBalances = this.filterBalancesBySymbol(this.currentCexBalances, symbol);
+    // Check for base balance in each exchange
+    for (const exchange in this.currentCexBalances) {
+      if (!this.currentCexBalances[exchange][baseAsset]) {
+        throw new Error(`Invalid ${baseAsset} balance in ${exchange}: ${this.currentCexBalances[exchange][baseAsset]}`);
+      }
+    }
+
     const results: ISimulationResult = {
       success: true,
       feeDeductionType: simulationType,
@@ -75,9 +85,6 @@ export class SimulationService {
       totalFeesInBase: this.totalFeesInBase,
     };
     try {
-      const [baseAsset, quoteAsset] = symbol.split('/');
-      const tradeAmount = this.configService.get('arbitrage_usdt_amount');
-
       // Validate buy side balances (minExchange)
       if (this.currentCexBalances[minExchange][quoteAsset] < tradeAmount) {
         results.warnings.push(
@@ -193,6 +200,7 @@ export class SimulationService {
         [symbol]: JSON.stringify(results),
       };
       this.logger.logArbitrage(dataSimulation);
+      console.log('__ Satisfied opportunity: ', results);
       return results;
     } catch (error) {
       this.log.error('Error in simulationArbitrage:', error);

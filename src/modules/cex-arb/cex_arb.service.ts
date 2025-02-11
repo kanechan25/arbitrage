@@ -81,7 +81,6 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
               return simulationResult;
             }),
           );
-          console.log('__ simulationResults: ', simulationResults);
           if (simulationResults.some((result) => result.warnings.length > 0)) {
             this.stopWatching();
             return;
