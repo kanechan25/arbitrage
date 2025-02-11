@@ -11,7 +11,7 @@ import { BybitService } from '@/services/cex/bybit/bybit.service';
 import { MexcService } from '@/services/cex/mexc/mexc.service';
 import { HuobiService } from '@/services/cex/huobi/huobi.service';
 import { CexCommonService } from '@/services/cex/cex.common.service';
-
+import { SimulationService } from '@/services/cex/simulation.service';
 @Module({
   imports: [ConfigModule],
   controllers: [CexArbController],
@@ -26,6 +26,7 @@ import { CexCommonService } from '@/services/cex/cex.common.service';
     MexcService,
     HuobiService,
     LoggerService,
+    SimulationService,
   ],
   exports: [CexArbService],
 })

@@ -5,8 +5,8 @@ import { IListenTicker, ISimulationResult, IWalletBalance, SimulationType } from
 import { LoggerService } from '@/services/_logger.service';
 import { mockCexBalances } from '@/constants/simulations';
 @Injectable()
-export class CexCommonService {
-  private readonly log = new Logger(CexCommonService.name);
+export class SimulationService {
+  private readonly log = new Logger(SimulationService.name);
   private currentCexBalances: Record<string, IWalletBalance>;
   private totalFeesInQuote: Record<string, number> = {};
   private totalFeesInBase: Record<string, number> = {};
