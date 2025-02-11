@@ -36,6 +36,6 @@ export default () => ({
     },
   ],
   arbitrage_usdt_amount: 5,
-  fetch_delay_min: 1000,
-  fetch_delay_max: 2000,
+  fetch_delay_min: 3000,
+  fetch_delay_max: 3500,
 });
