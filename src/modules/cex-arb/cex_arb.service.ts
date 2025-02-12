@@ -69,23 +69,23 @@ export class CexArbService implements OnModuleInit, OnModuleDestroy {
           this.exchanges,
           this.configService.get('symbols'),
           SIMULATION_TYPE,
-          false,
+          true,
         );
         CexArbService.fetchCount++;
         console.log(`___________Fetch count: ${CexArbService.fetchCount}`);
-        if (results) {
-          // Every item in results is a satisfied result => TODO: ARBITRAGE (!!!slippage)
-          const simulationResults = await Promise.all(
-            results.map((result) => {
-              const simulationResult = this.simulationService.simulationArbitrage(result, SIMULATION_TYPE);
-              return simulationResult;
-            }),
-          );
-          if (simulationResults.some((result) => result.warnings.length > 0)) {
-            this.stopWatching();
-            return;
-          }
-        }
+        // if (results) {
+        //   // Every item in results is a satisfied result => TODO: ARBITRAGE (!!!slippage)
+        //   const simulationResults = await Promise.all(
+        //     results.map((result) => {
+        //       const simulationResult = this.simulationService.simulationArbitrage(result, SIMULATION_TYPE);
+        //       return simulationResult;
+        //     }),
+        //   );
+        //   if (simulationResults.some((result) => result.warnings.length > 0)) {
+        //     this.stopWatching();
+        //     return;
+        //   }
+        // }
         // const analysis = await this.pricesService.analyzeExchangeLog(LOG_PATHS, false);
         // this.logger.log('__analysis: ', analysis);
         // const result = await this.mexcService.fetchBalance(['PENGU'], 'spot');
